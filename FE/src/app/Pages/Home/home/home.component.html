@@ -1,0 +1,50 @@
+
+<div class="grid grid-cols-3 p-1 rounded-2xl gap-1 take_all_space card_cruscotto bg-[#040713]">
+  <div class="grid grid-rows-5 gap-1">
+    <div class="row-span-4">
+      <div class="grid grid-flow-col grid-cols-6 test_div col-span-2 row-span-2 gap-1 take_all_space">
+        <div class="test_div take_all_space flex flex-row items-end col-span-4 p-2 cool_border card_cruscotto">
+          <div class="flex flex-col-reverse w-full ">
+            <div class="flex flex-row items-end h-full">
+              <p class="row-span-3 text-[8rem] font-mono">
+                {{obd_data?.velocita}}
+              </p>
+              <p class="text-3xl font-mono mb-10">
+                km/h
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="test_div take_all_space flex flex-col-reverse col-span-2 cool_border card_cruscotto">
+          <div class="cool_border" [ngStyle]="{
+            height: rpmPercentage + '%',
+            backgroundColor: rpmColor
+          }">
+          </div>
+          <p class="absolute self-center items-center text-white text-3xl text-end font-mono">
+            {{obd_data?.rpm}}rpm</p>
+        </div>
+      </div>
+    </div>
+    <div class="row-span-1">
+      <div class="grid grid-flow-col grid-cols-4 row-start-4 h-full test_div">
+        <div class="test_div col-span-4 card_cruscotto">
+          <p class="absolute mt-9 ml-1 text-3xl font-mono ">
+            {{obd_data?.acceleratore}}%
+          </p>
+          <div class="test_div h-full cool_border" [ngStyle]="{
+            width: throttlePercentage + '%',
+            backgroundColor: throttleColor
+          }">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card_cruscotto">
+
+  </div>
+  <div class="card_cruscotto">
+
+  </div>
+</div>

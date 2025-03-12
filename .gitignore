@@ -1,0 +1,45 @@
+# See http://help.github.com/ignore-files/ for more about ignoring files.
+
+# Compiled output
+/FE/dist
+/FE/tmp
+/FE/out-tsc
+/FE/bazel-out
+
+# Node
+/FE/node_modules
+/FEnpm-debug.log
+/FEyarn-error.log
+
+# IDEs and editors
+/FE.idea/
+/FE.project
+/FE.classpath
+/FE.c9/
+/FE*.launch
+/FE.settings/
+/FE*.sublime-workspace
+
+# Visual Studio Code
+/FE.vscode/*
+/FE!.vscode/settings.json
+/FE!.vscode/tasks.json
+/FE!.vscode/launch.json
+/FE!.vscode/extensions.json
+/FE.history/*
+
+# Miscellaneous
+/FE/.angular/cache
+/FE.sass-cache/
+/FE/connect.lock
+/FE/coverage
+/FE/libpeerconnection.log
+/FEtestem.log
+/FE/typings
+
+# System files
+/FE/.DS_Store
+/FE/Thumbs.db
+
+#Python
+/BE/__pycache__

@@ -1,0 +1,41 @@
+/* You can add global styles to this file, and also import other style files */
+@import "tailwindcss";
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+
+.cool_border {
+  @apply border-[1px] border-[#262b44] rounded-2xl
+}
+
+.card_cruscotto {
+  @apply border-[1px] border-[#262b44] rounded-2xl bg-[#11131e]
+}
+
+.test_div{
+  /* @apply border-[1px] border-s-white */
+}
+
+.take_all_space {
+  @apply w-full h-full
+}
+
+html {
+  height: 100vh;
+  width: 100vw;
+}
+
+body {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+body > * {
+  width: 100%;
+  height: 100%;
+  padding: 0.1rem;
+  /* border-radius: 10%; */
+  /* border: 1px solid #e2e8f0; */
+}
