@@ -1,21 +1,17 @@
 import { Component, OnInit } from '@angular/core';
-import { Socket } from 'ngx-socket-io';
-import { map } from 'rxjs';
-import { obd_data } from 'src/app/Models/Interfaces/obd.interface';
-import { ObdService } from 'src/app/Services/obd.service';
 import {
   motore_prestazioni,
   MotorePrestazioniService,
 } from 'src/app/Services/OBD_Handler/motore_prestazioni.service';
-import { SocketService } from 'src/app/Services/socket.service';
 
 @Component({
-  selector: 'app-home',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css'],
+  selector: 'app-cruscotto',
+  templateUrl: './cruscotto.component.html',
+  styleUrls: ['./cruscotto.component.css'],
   standalone: false,
 })
-export class HomeComponent implements OnInit {
+export class CruscottoComponent implements OnInit {
+
   maxRpm: number = 7200; // RPM massimo
   rpmPercentage: number = 0; // Altezza della barra
   rpmColor: string = 'green'; // Colore iniziale

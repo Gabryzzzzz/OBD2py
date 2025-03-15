@@ -2,6 +2,7 @@
 @import "tailwindcss";
 @import "tailwindcss";
 @import "tailwindcss-primeui";
+@import "primeicons/primeicons.css";
 
 .cool_border {
   @apply border-[1px] border-[#262b44] rounded-2xl

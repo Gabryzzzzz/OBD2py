@@ -15,7 +15,14 @@ def leggi_dati(connection, sio):
     if not connection.is_connected():
         simula_dati(sio)
     else:
-        dati = {nome: connection.query(comando).value for nome, comando in comandi.items()}
+        #leggi e formatta i vari dati per avere interi
+        dati = {}
+        for nome, comando in comandi.items():
+            try:
+                risposta = connection.query(comando)
+                dati[nome] = int(risposta.value.magnitude)
+            except Exception as e:
+                dati[nome] = 0
         sio.emit('motore', dati)
         if cfg.SHOW_PRINTS:
             print(f"📤 Motore: {dati}")

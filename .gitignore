@@ -8,33 +8,33 @@
 
 # Node
 /FE/node_modules
-/FEnpm-debug.log
-/FEyarn-error.log
+/FE/npm-debug.log
+/FE/yarn-error.log
 
 # IDEs and editors
-/FE.idea/
-/FE.project
-/FE.classpath
-/FE.c9/
-/FE*.launch
-/FE.settings/
-/FE*.sublime-workspace
+/FE/.idea/
+/FE/.project
+/FE/.classpath
+/FE/.c9/
+/FE/.launch
+/FE/.settings/
+/FE/.sublime-workspace
 
 # Visual Studio Code
-/FE.vscode/*
-/FE!.vscode/settings.json
-/FE!.vscode/tasks.json
-/FE!.vscode/launch.json
-/FE!.vscode/extensions.json
-/FE.history/*
+/FE/.vscode/*
+/FE/.vscode/settings.json
+/FE/.vscode/tasks.json
+/FE/.vscode/launch.json
+/FE/.vscode/extensions.json
+/FE/.history/*
 
 # Miscellaneous
 /FE/.angular/cache
-/FE.sass-cache/
+/FE/.sass-cache/
 /FE/connect.lock
 /FE/coverage
 /FE/libpeerconnection.log
-/FEtestem.log
+/FE/testem.log
 /FE/typings
 
 # System files

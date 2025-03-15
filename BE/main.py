@@ -14,7 +14,8 @@ sio = socketio.Server(cors_allowed_origins="*")
 app = socketio.WSGIApp(sio)
 
 # Connessione OBD
-connection = obd.OBD(OBD_PORT)
+# connection = obd.OBD(OBD_PORT)
+connection = obd.OBD("COM11", baudrate=38400, fast=True)
 
 if connection.is_connected():
     print("✅ Connessione OBD riuscita!")
@@ -25,10 +26,10 @@ else:
 def send_data():
     while True:
         motore_prestazioni.leggi_dati(connection, sio)
-        data_consumi = consumi_carburante.leggi_dati(connection, sio)
-        temperatura_sensori.leggi_dati(connection, sio)
-        diagnostica.leggi_dati(connection, sio)
-        emissioni.leggi_dati(connection, sio)
+        # data_consumi = consumi_carburante.leggi_dati(connection, sio)
+        # temperatura_sensori.leggi_dati(connection, sio)
+        # diagnostica.leggi_dati(connection, sio)
+        # emissioni.leggi_dati(connection, sio)
         eventlet.sleep(UPDATE_INTERVAL)
 
 # Avvia il thread per inviare dati periodicamente
