@@ -7,7 +7,6 @@ import {
   motore_prestazioni,
   MotorePrestazioniService,
 } from 'src/app/Services/OBD_Handler/motore_prestazioni.service';
-import { SocketService } from 'src/app/Services/socket.service';
 
 @Component({
   selector: 'app-home',

@@ -5,8 +5,7 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { HomeComponent } from './Pages/Home/home/home.component';
 
-import { SocketIoModule, SocketIoConfig } from 'ngx-socket-io';
-import { SocketService } from './Services/socket.service';
+import { SocketIoModule, SocketIoConfig, Socket } from 'ngx-socket-io';
 import { ObdService } from './Services/obd.service';
 
 import { provideAnimations } from '@angular/platform-browser/animations';
@@ -26,9 +25,18 @@ import { MediaComponent } from './Pages/media/media.component';
 import { ProfileComponent } from './Pages/profile/profile.component';
 import { SettingsComponent } from './Pages/settings/settings.component';
 import { StatisticaComponent } from './Pages/statistica/statistica.component';
+import { SocketConnectionService } from './Services/socket.service';
+import { AlertService } from './Services/alert.service';
+import { Toast } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
-const config: SocketIoConfig = {
+const primaryConfig: SocketIoConfig = {
   url: 'http://localhost:5000',
+  options: { secure: true, transports: ['websocket'] },
+};
+
+const secondaryConfig: SocketIoConfig = {
+  url: 'http://localhost:5001',
   options: { secure: true, transports: ['websocket'] },
 };
 
@@ -49,18 +57,21 @@ const config: SocketIoConfig = {
     DrawerModule,
     BrowserModule,
     AppRoutingModule,
-    SocketIoModule.forRoot(config),
+    Toast,
+    SocketIoModule.forRoot(primaryConfig),
   ],
   providers: [
     provideAnimations(),
-    importProvidersFrom(SocketIoModule.forRoot(config)),
-    SocketService,
+    importProvidersFrom(SocketIoModule.forRoot(primaryConfig)),
     ObdService,
+    SocketConnectionService,
     ConsumiCarburanteService,
     DiagnosiService,
     EmissioniService,
     MotorePrestazioniService,
     TemperatureSensoriService,
+    AlertService,
+    MessageService,
     providePrimeNG({
       theme: {
         preset: Aura,
@@ -69,4 +80,13 @@ const config: SocketIoConfig = {
   ],
   bootstrap: [AppComponent],
 })
-export class AppModule {}
+export class AppModule {
+
+  //on socket connect error print a log
+  constructor(private socket: Socket) {
+    this.socket.on('connect_error', () => {
+      console.log('Connection error');
+    });
+  }
+
+ }
