@@ -1,10 +1,10 @@
-<p-button class="absolute top-12 left-12 scale-250" icon="pi pi-bars" (click)="visible_drawer = !visible_drawer"
+<p-button class="absolute top-12 left-12 scale-250 opacity-75" icon="pi pi-bars" (click)="visible_drawer = !visible_drawer"
   [rounded]="true" severity="secondary" />
   <div  class="take_all_space">
     <router-outlet></router-outlet>
   </div>
 <p-drawer header="Menu" [(visible)]="visible_drawer" position="bottom" styleClass="!h-3/4">
-  <div class="grid grid-cols-6 gap-2 h-full">
+  <div class="grid pc:grid-cols-6 gap-2 w-full h-full">
     <div class="flex flex-row justify-center items-center">
       <div class="flex flex-col justify-center items-center gap-1">
         <p-button class="scale-400" icon="pi pi-car" (click)="visible_drawer = !visible_drawer" [routerLink]="'cruscotto'" [rounded]="true"

@@ -12,7 +12,7 @@ export class AlertService {
 
   getMessage() {
     return this.socket
-      .fromEvent<alert_interface, any>('obd_error')
+      .fromEvent<alert_interface, any>('popup_channel')
       .pipe(map((data) => {
         this.errors_subject.next(data);
         console.log(data);

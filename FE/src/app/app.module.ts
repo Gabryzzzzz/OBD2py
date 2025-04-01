@@ -25,21 +25,29 @@ import { MediaComponent } from './Pages/media/media.component';
 import { ProfileComponent } from './Pages/profile/profile.component';
 import { SettingsComponent } from './Pages/settings/settings.component';
 import { StatisticaComponent } from './Pages/statistica/statistica.component';
-import { SocketConnectionService } from './Services/socket.service';
 import { AlertService } from './Services/alert.service';
 import { Toast } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
+import { Dialog } from 'primeng/dialog';
+import { InputGroupModule } from 'primeng/inputgroup';
+import { InputGroupAddonModule } from 'primeng/inputgroupaddon';
+import { InputTextModule } from 'primeng/inputtext';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { SliderModule } from 'primeng/slider';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ToggleSwitchModule } from 'primeng/toggleswitch';
+import { IftaLabelModule } from 'primeng/iftalabel';
+import { SocketRequestsService } from './Services/socketRequests.service';
+import { UtilsService } from './Services/utils.service';
+import { ips } from 'src/assets/ip';
+import { DividerModule } from 'primeng/divider';
+import { ChartModule } from 'primeng/chart';
+
 
 const primaryConfig: SocketIoConfig = {
-  url: 'http://localhost:5000',
+  url: 'http://'+ ips.ip +':5000',
   options: { secure: true, transports: ['websocket'] },
 };
-
-const secondaryConfig: SocketIoConfig = {
-  url: 'http://localhost:5001',
-  options: { secure: true, transports: ['websocket'] },
-};
-
 @NgModule({
   declarations: [
     AppComponent,
@@ -58,13 +66,24 @@ const secondaryConfig: SocketIoConfig = {
     BrowserModule,
     AppRoutingModule,
     Toast,
+    Dialog,
+    InputGroupModule,
+    InputGroupAddonModule,
+    InputTextModule ,
+    ReactiveFormsModule,
+    FormsModule,
+    SliderModule,
+    CheckboxModule,
+    ToggleSwitchModule,
+    IftaLabelModule,
+    DividerModule,
+    ChartModule,
     SocketIoModule.forRoot(primaryConfig),
   ],
   providers: [
     provideAnimations(),
     importProvidersFrom(SocketIoModule.forRoot(primaryConfig)),
     ObdService,
-    SocketConnectionService,
     ConsumiCarburanteService,
     DiagnosiService,
     EmissioniService,
@@ -72,6 +91,8 @@ const secondaryConfig: SocketIoConfig = {
     TemperatureSensoriService,
     AlertService,
     MessageService,
+    SocketRequestsService,
+    UtilsService,
     providePrimeNG({
       theme: {
         preset: Aura,
@@ -84,6 +105,8 @@ export class AppModule {
 
   //on socket connect error print a log
   constructor(private socket: Socket) {
+    console.log(ips.ip);
+
     this.socket.on('connect_error', () => {
       console.log('Connection error');
     });

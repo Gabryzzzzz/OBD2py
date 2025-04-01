@@ -4,6 +4,16 @@
 @import "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
 
+@theme {
+  /* --breakpoint-xs: 30rem; */
+  --breakpoint-pc: 91rem;
+  /* --breakpoint-3xl: 120rem; */
+}
+
+* {
+  font-family: monospace;
+}
+
 .cool_border {
   @apply border-[1px] border-[#262b44] rounded-2xl
 }

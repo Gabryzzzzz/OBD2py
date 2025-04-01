@@ -1,38 +1,37 @@
-
-<div class="grid grid-cols-3 p-1 rounded-2xl gap-1 take_all_space card_cruscotto bg-[#040713]">
+<div class="grid pc:grid-cols-3 p-1 rounded-2xl gap-1 take_all_space card_cruscotto bg-[#040713]">
   <div class="grid grid-rows-5 gap-1">
     <div class="row-span-4">
       <div class="grid grid-flow-col grid-cols-6 test_div col-span-2 row-span-2 gap-1 take_all_space">
         <div class="test_div take_all_space flex flex-row items-end col-span-4 p-2 cool_border card_cruscotto">
-          <div class="flex flex-col-reverse w-full ">
+          <div class="flex flex-col-reverse w-full">
             <div class="flex flex-row items-end h-full">
               <p class="row-span-3 text-[8rem] font-mono">
-                {{obd_data?.velocita}}
+                {{speed}}
               </p>
-              <p class="text-3xl font-mono mb-10">
+              <p class="text-6xl font-mono mb-10">
                 km/h
               </p>
             </div>
           </div>
         </div>
         <div class="test_div take_all_space flex flex-col-reverse col-span-2 cool_border card_cruscotto">
-          <div class="cool_border w-full" [ngStyle]="{
+          <div class="cool_border w-full transition-all transition-slowest ease" [ngStyle]="{
             height: rpmPercentage + '%',
             backgroundColor: rpmColor
           }">
           </div>
-          <p class="absolute self-center items-center text-white text-3xl text-end font-mono">
-            {{obd_data?.rpm}}rpm</p>
+          <p class="absolute self-center items-center text-white text-5xl text-end font-mono">
+            {{rpm}}rpm</p>
         </div>
       </div>
     </div>
     <div class="row-span-1">
-      <div class="grid grid-flow-col grid-cols-4 row-start-4 h-full test_div">
+      <div class="grid grid-flow-col grid-cols-4 row-start-4 h-full test_div" (click)="setup_throttle_visible = true">
         <div class="test_div col-span-4 card_cruscotto">
-          <p class="absolute mt-9 ml-1 text-3xl font-mono ">
-            {{obd_data?.acceleratore}}%
+          <p class="absolute mt-9 ml-1 text-6xl font-mono ">
+            {{throttlePercentage | number: '1.0-0'}}%
           </p>
-          <div class="test_div h-full cool_border" [ngStyle]="{
+          <div class="test_div h-full cool_border transition-all transition-slowest ease" [ngStyle]="{
             width: throttlePercentage + '%',
             backgroundColor: throttleColor
           }">
@@ -41,10 +40,112 @@
       </div>
     </div>
   </div>
-  <div class="card_cruscotto grid grid-rows-5 gap-1">
+  <div class="card_cruscotto flex flex-col-reverse align-bottom justify-baseline gap-5 p-5 take_all_space">
+    <div class="flex flex-row gap-2 justify-between">
+      <div class="flex flex-row gap-2 ">
+        <span class="pi pi-globe" style="font-size: 3rem"></span>
+        <p class="text-5xl font-bold">6.8</p>
+        <p class="text-5xl font-bold"></p>
+        <span class="pi pi-bolt" style="font-size: 3rem"></span>
+        <p class="text-5xl font-bold">6.8</p>
+      </div>
+      <p class="text-5xl font-bold">L/100km</p>
+    </div>
+    <p-divider />
 
+    <div class="flex flex-row gap-2 justify-between">
+      <p class="text-5xl font-bold">A: 123km</p>
+      <p class="text-5xl font-bold">Res: 600km</p>
+    </div>
   </div>
   <div class="card_cruscotto grid grid-rows-5 gap-1">
-
+    <!-- <p-chart type="line" [data]="chart_data" [options]="chart_options" class="h-full w-full" /> -->
   </div>
+
+  <p-dialog header="Setup valori accelleratore" class="absolute" [modal]="true" [(visible)]="setup_throttle_visible"
+    [style]="{ width: '35rem', height: '85vh' }">
+    <p-inputgroup class="row-span-1">
+      <p-inputgroup-addon>
+        <p-button icon="pi pi-minus"
+          (click)="setup_accelleratore_html.value = (parse_int(setup_accelleratore_html.value) - 1).toString()"
+          severity="secondary" />
+      </p-inputgroup-addon>
+      <input class="w-full" #setup_accelleratore_html pInputText placeholder="" type="number" value="0" />
+      <p-inputgroup-addon>
+        <p-button icon="pi pi-plus"
+          (click)="setup_accelleratore_html.value = (parse_int(setup_accelleratore_html.value) + 1).toString()"
+          severity="secondary" />
+      </p-inputgroup-addon>
+    </p-inputgroup>
+
+    <div class="flex flex-col gap-2 grow-0 row-span-2 py-5" #fase_uno_setup_accelleratore>
+      <p class="p-text-secondary block text-white">Imposta valore minimo accelleratore</p>
+      <h4 class="p-text-secondary block text-3xl text-white">{{obd_data?.acceleratore}}</h4>
+      <p-button label="Imposta" severity="contrast" class=""
+        (click)="setup_throttle(1, parse_int(setup_accelleratore_html.value)); fase_due_setup_accelleratore.style.display = 'block'; fase_uno_setup_accelleratore.style.display = 'none'"></p-button>
+    </div>
+
+    <div class="flex flex-col gap-2 grow-0 row-span-2 py-5" style="display: none;" #fase_due_setup_accelleratore>
+      <p class="p-text-secondary block text-white">Imposta valore massimo accelleratore</p>
+      <h4 class="p-text-secondary block text-3xl text-white">{{obd_data?.acceleratore}}</h4>
+      <p-button label="Imposta" severity="contrast" class=""
+        (click)="setup_throttle(2, parse_int(setup_accelleratore_html.value)); fase_due_setup_accelleratore.style.display = 'none'; fase_uno_setup_accelleratore.style.display = 'block'"></p-button>
+    </div>
+  </p-dialog>
 </div>
+
+<p-button class="absolute top-12 left-40 scale-250" icon="pi pi-wrench" (click)="visible_test_page = !visible_test_page"
+  [rounded]="true" severity="secondary" />
+<p-drawer header="Test" [(visible)]="visible_test_page" position="right" styleClass="!w-1/3">
+  <div class="card_cruscotto flex flex-col gap-5 p-5 take_all_space overflow-y-scroll">
+    <div class="flex items-center">
+      <p-toggleswitch [(ngModel)]="test_mode" (onChange)="handle_test_mode(1)">
+        <ng-template #handle let-checked="checked">
+          <i [ngClass]="['!text-xs', 'pi', checked ? 'pi-check' : 'pi-times']"></i>
+        </ng-template>
+      </p-toggleswitch>
+      <label for="test_mode" class="ml-2 mb-1"> Test mode </label>
+    </div>
+    <div>
+      <!-- <label for="">Accelleratore</label> -->
+      <p-iftalabel class="w-full mb-4">
+        <input pInputText id="test_accelleratore" class="w-full" [(ngModel)]="test_fixed_throttle" />
+        <label for="test_accelleratore">Accelleratore</label>
+      </p-iftalabel>
+      <!-- <input type="text" pInputText [(ngModel)]="test_fixed_throttle" class="w-full mb-4" /> -->
+      <p-slider [(ngModel)]="test_fixed_throttle" class="w-full"
+        (onChange)="this.obd_data!.acceleratore = test_fixed_throttle; handle_test_mode()" [min]="0" [max]="100" />
+    </div>
+    <div>
+      <!-- <label for="">Accelleratore</label> -->
+      <p-iftalabel class="w-full mb-4">
+        <input pInputText id="test_accelleratore" class="w-full" [(ngModel)]="test_fixed_rpm" />
+        <label for="test_accelleratore">Giri</label>
+      </p-iftalabel>
+      <!-- <input type="text" pInputText [(ngModel)]="test_fixed_throttle" class="w-full mb-4" /> -->
+      <p-slider [(ngModel)]="test_fixed_rpm" class="w-full"
+        (onChange)="this.obd_data!.rpm = test_fixed_rpm; handle_test_mode()" [min]="0" [max]="7200" />
+    </div>
+    <div>
+      <!-- <label for="">Accelleratore</label> -->
+      <p-iftalabel class="w-full mb-4">
+        <input pInputText id="test_accelleratore" class="w-full" [(ngModel)]="test_fixed_speed" />
+        <label for="test_accelleratore">Velocità</label>
+      </p-iftalabel>
+      <!-- <input type="text" pInputText [(ngModel)]="test_fixed_throttle" class="w-full mb-4" /> -->
+      <p-slider [(ngModel)]="test_fixed_speed" class="w-full"
+        (onChange)="this.obd_data!.velocita= test_fixed_speed; handle_test_mode()" [min]="0" [max]="200" />
+    </div>
+    <div class="flex flex-col gap-2 grow-0 row-span-2 py-5">
+      <p class="p-text-secondary block text-white">Test socket verso python</p>
+      <!-- <div class="flex flex-row"> -->
+      <!-- <p-button label="Cerca" severity="contrast"
+          (onClick)="get_ips()"></p-button> -->
+      <div class="flex flex-col gap-1 mx-2">
+        <p class="p-text-secondary block text-white">Local ip: {{local_ip == '' ? 'Non cercato' : local_ip}}</p>
+        <p class="p-text-secondary block text-white">Public ip: {{public_ip == '' ? 'Non cercato' : public_ip}}</p>
+      </div>
+      <!-- </div> -->
+    </div>
+  </div>
+</p-drawer>

@@ -1,4 +1,63 @@
+<div class="grid pc:grid-cols-3 p-1 rounded-2xl gap-1 take_all_space card_cruscotto bg-[#040713]">
 
-<div class="grid grid-cols-3 p-1 rounded-2xl gap-1 take_all_space card_cruscotto bg-[#040713]">
+  <div class="col-span-1 take_all_space card_cruscotto">
+    <div *ngIf="config != undefined" class="flex flex-col gap-2 p-2">
+      <h3 class="font-mono text-2xl">Setup configurazione obd BE</h3>
+      <div class="flex flex-col gap-2">
+        <label for="com_port">COM Port</label>
+        <input pInputText id="com_port" aria-describedby="com_port-help" [(ngModel)]="config!.OBD_PORT" />
+      </div>
+      <div class="flex flex-col gap-2 ml-2">
+        <label for="update_interval">Update interval</label>
+        <div class="flex flex-row gap-1 items-center">
+          <p-slider [(ngModel)]="config!.UPDATE_INTERVAL" class="w-full" [min]="0" [max]="10" [step]="0.1" />
+          <p class="w-10 text-end">{{config!.UPDATE_INTERVAL}}s</p>
+        </div>
+      </div>
+      <div class="flex flex-row gap-2">
+        <div class="flex items-center mt-2">
+          <p-toggleswitch [(ngModel)]="config!.TRY_ENABLED">
+            <ng-template #handle let-checked="checked">
+              <i [ngClass]="['!text-xs', 'pi', checked ? 'pi-check' : 'pi-times']"></i>
+            </ng-template>
+          </p-toggleswitch>
+          <label for="enable_try" class="ml-2 mb-1"> Abilita tentativi multipli </label>
+        </div>
+        <div class="flex items-center mt-2">
+          <p-toggleswitch [(ngModel)]="config!.SHOW_PRINTS">
+            <ng-template #handle let-checked="checked">
+              <i [ngClass]="['!text-xs', 'pi', checked ? 'pi-check' : 'pi-times']"></i>
+            </ng-template>
+          </p-toggleswitch>
+          <label for="show_logs" class="ml-2 mb-1"> Mostra logs in BE </label>
+        </div>
+      </div>
 
+      <div class="flex flex-col gap-2 ml-2">
+        <label for="try_times">Numero tentativi</label>
+        <div class="flex flex-row gap-1 items-center">
+          <p-slider [(ngModel)]="config!.TRY_TIMES" class="w-full" [min]="1" [max]="10" [step]="1" />
+          <p class="w-10 text-end">{{config!.TRY_TIMES}}</p>
+        </div>
+      </div>
+      <div class="flex flex-col gap-2 ml-2">
+        <label for="update_interval">Intervallo di tempo tra i tentativi</label>
+        <div class="flex flex-row gap-1 items-center">
+          <p-slider [(ngModel)]="config!.TRY_SLEEP" class="w-full" [min]="1" [max]="10" [step]="1" />
+          <p class="w-10 text-end">{{config!.TRY_SLEEP}}s</p>
+        </div>
+      </div>
+      <div class="flex flex-row gap-2">
+        <p-button severity="contrast" label="Aggiorna Configurazione" (onClick)="invia_configurazione()" />
+        <p-button severity="contrast" label="Restart obd" (onClick)="restart_obd()" />
+        <p-button severity="contrast" label="Stop obd" (onClick)="stop_obd()" />
+
+      </div>
+    </div>
+  </div>
+  <div class=" take_all_space card_cruscotto">
+  </div>
+  <div class=" take_all_space card_cruscotto">
+    <!-- {{this.config | json}} -->
+  </div>
 </div>

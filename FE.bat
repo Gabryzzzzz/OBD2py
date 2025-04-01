@@ -1,0 +1,1 @@
+start cmd /c "cd FE & ng s --host 0.0.0.0"

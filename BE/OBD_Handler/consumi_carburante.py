@@ -1,13 +1,13 @@
 import obd
 import random
-import config as cfg
+from config import config as cfg
 
 
 def leggi_dati(connection, sio):
     comandi = {
         "livello_carburante": obd.commands.FUEL_LEVEL,
         "consumo_instaneo": obd.commands.FUEL_RATE,
-        "pressione_carburante": obd.commands
+        "pressione_carburante": obd.commands.FUEL_LEVEL
     }
 
     #se non è connesso simulare i dati

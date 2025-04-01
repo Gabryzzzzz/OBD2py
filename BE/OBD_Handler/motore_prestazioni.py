@@ -1,6 +1,6 @@
 import obd
 import random
-import config as cfg
+from config import config as cfg
 
 def leggi_dati(connection, sio):
     comandi = {
@@ -8,7 +8,7 @@ def leggi_dati(connection, sio):
         "velocita": obd.commands.SPEED,
         "acceleratore": obd.commands.THROTTLE_POS,
         "pressione_map": obd.commands.THROTTLE_POS, #da cambiare
-        "flusso_maf": obd.commands.MAF
+        "flusso_maf": obd.commands.THROTTLE_POS
     }
 
     #se non è connesso simulare i dati
@@ -34,7 +34,7 @@ def simula_dati(sio):
     dati = {
         "rpm": random.randint(800, 7200),
         "velocita": random.randint(0, 180),
-        "acceleratore": random.randint(0, 100),
+        "acceleratore": random.randint(14, 75),
         "pressione_map": random.randint(0, 100),
         "flusso_maf": random.randint(0, 100)
     }
