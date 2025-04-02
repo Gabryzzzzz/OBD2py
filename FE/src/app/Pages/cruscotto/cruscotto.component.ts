@@ -6,6 +6,14 @@ import {
 import { SocketRequestsService } from 'src/app/Services/socketRequests.service';
 import { UtilsService } from 'src/app/Services/utils.service';
 
+export interface cruscotto_configuration {
+  throttle_data: {
+    min: number;
+    max: number;
+  };
+  unit_flag_benzina: boolean;
+}
+
 @Component({
   selector: 'app-cruscotto',
   templateUrl: './cruscotto.component.html',
@@ -17,8 +25,6 @@ export class CruscottoComponent implements OnInit {
   rpmPercentage: number = 0; // Altezza della barra
   rpmColor: string = 'green'; // Colore iniziale
 
-  minThrottle: number = 0; // Accelletatore minimo
-  maxThrottle: number = 100; // Accelletatore massimo
   throttlePercentage: number = 0; // Altezza della barra
   throttleColor: string = 'green'; // Colore iniziale
 
@@ -39,91 +45,41 @@ export class CruscottoComponent implements OnInit {
 
   obd_data: motore_prestazioni | undefined;
 
-  data: any;
-
-  // options: any;
-
-  // platformId = inject(PLATFORM_ID);
-
-  // initChart() {
-  //   if (isPlatformBrowser(this.platformId)) {
-  //     const documentStyle = getComputedStyle(document.documentElement);
-  //     const textColor = documentStyle.getPropertyValue('--p-text-color');
-  //     const textColorSecondary = documentStyle.getPropertyValue(
-  //       '--p-text-muted-color'
-  //     );
-  //     const surfaceBorder = documentStyle.getPropertyValue(
-  //       '--p-content-border-color'
-  //     );
-
-  //     this.data = {
-  //       labels: [
-  //         'January',
-  //         'February',
-  //         'March',
-  //         'April',
-  //         'May',
-  //         'June',
-  //         'July',
-  //       ],
-  //       datasets: [
-  //         {
-  //           label: 'First Dataset',
-  //           data: [65, 59, 80, 81, 56, 55, 40],
-  //           fill: false,
-  //           borderColor: documentStyle.getPropertyValue('--p-cyan-500'),
-  //           tension: 0.4,
-  //         },
-  //         {
-  //           label: 'Second Dataset',
-  //           data: [28, 48, 40, 19, 86, 27, 90],
-  //           fill: false,
-  //           borderColor: documentStyle.getPropertyValue('--p-gray-500'),
-  //           tension: 0.4,
-  //         },
-  //       ],
-  //     };
-
-  //     this.options = {
-  //       maintainAspectRatio: false,
-  //       aspectRatio: 0.6,
-  //       plugins: {
-  //         legend: {
-  //           labels: {
-  //             color: textColor,
-  //           },
-  //         },
-  //       },
-  //       scales: {
-  //         x: {
-  //           ticks: {
-  //             color: textColorSecondary,
-  //           },
-  //           grid: {
-  //             color: surfaceBorder,
-  //             drawBorder: false,
-  //           },
-  //         },
-  //         y: {
-  //           ticks: {
-  //             color: textColorSecondary,
-  //           },
-  //           grid: {
-  //             color: surfaceBorder,
-  //             drawBorder: false,
-  //           },
-  //         },
-  //       },
-  //     };
-  //     this.cd.markForCheck();
-  //   }
-  // }
+  configuration: cruscotto_configuration = {
+    throttle_data: {
+      min: 0,
+      max: 100,
+    },
+    unit_flag_benzina: true,
+  };
 
   constructor(
     private motore: MotorePrestazioniService,
     private socket_requests: SocketRequestsService,
     private utils_service: UtilsService
-  ) {}
+  ) {
+    this.setup_configuration();
+  }
+
+  setup_configuration() {
+    //if the item is not in local storage, set the default values
+    if (!localStorage.getItem('configuration')) {
+      localStorage.setItem('configuration', JSON.stringify(this.configuration));
+    } else {
+      const configuration = localStorage.getItem('configuration');
+      if (configuration) {
+        const configuration_obj = JSON.parse(
+          configuration
+        ) as cruscotto_configuration;
+        this.configuration = configuration_obj;
+      }
+    }
+  }
+
+  update_configuration() {
+    //update the local storage with the new values
+    localStorage.setItem('configuration', JSON.stringify(this.configuration));
+  }
 
   ngOnChanges() {}
 
@@ -135,6 +91,11 @@ export class CruscottoComponent implements OnInit {
     this.utils_service.get_public_ip().then((data) => {
       this.public_ip = data;
     });
+  }
+
+  handle_unit_benzina() {
+    this.configuration.unit_flag_benzina = !this.configuration.unit_flag_benzina;
+    this.update_configuration();
   }
 
   async handle_speed_animation() {
@@ -201,22 +162,25 @@ export class CruscottoComponent implements OnInit {
     console.log(this.obd_data!.acceleratore);
     if (fase == 1) {
       if (setup_html != 0) {
-        this.minThrottle = setup_html;
+        this.configuration.throttle_data.min = setup_html;
       } else {
-        this.minThrottle = this.obd_data!.acceleratore;
+        this.configuration.throttle_data.min = this.obd_data!.acceleratore;
       }
     }
     if (fase == 2) {
       if (setup_html != 0) {
-        this.maxThrottle = setup_html;
+        this.configuration.throttle_data.max = setup_html;
       } else {
-        this.maxThrottle = this.obd_data!.acceleratore;
+        this.configuration.throttle_data.max = this.obd_data!.acceleratore;
       }
       this.setup_throttle_visible = false;
     }
     //log min e max throttle
-    console.log(this.minThrottle);
-    console.log(this.maxThrottle);
+    console.log(this.configuration.throttle_data.min);
+    console.log(this.configuration.throttle_data.max);
+
+    //set in local storage bot values in the same object
+    this.update_configuration();
   }
 
   handle_throttle() {
@@ -243,8 +207,8 @@ export class CruscottoComponent implements OnInit {
 
       //rebuild using min and max throttle
       this.throttlePercentage =
-        ((this.obd_data!.acceleratore - this.minThrottle) /
-          (this.maxThrottle - this.minThrottle)) *
+        ((this.obd_data!.acceleratore - this.configuration.throttle_data.min) /
+          (this.configuration.throttle_data.max - this.configuration.throttle_data.min)) *
         100;
       if (this.throttlePercentage > 100) {
         this.throttlePercentage = 100;
@@ -252,8 +216,8 @@ export class CruscottoComponent implements OnInit {
       const red = Math.min(
         255,
         Math.floor(
-          ((this.obd_data!.acceleratore - this.minThrottle) /
-            (this.maxThrottle - this.minThrottle)) *
+          ((this.obd_data!.acceleratore -  this.configuration.throttle_data.min) /
+            ( this.configuration.throttle_data.max -  this.configuration.throttle_data.min)) *
             255
         )
       );

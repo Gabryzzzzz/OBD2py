@@ -1,3 +1,3 @@
 export class ips {
-  static ip: string = "192.168.251.140";
+  static ip: string = "192.168.0.187";
 }

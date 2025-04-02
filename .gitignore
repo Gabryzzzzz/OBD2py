@@ -43,3 +43,4 @@
 
 #Python
 /BE/__pycache__
+BE/OBD_Handler/__pycache__/*.pyc
