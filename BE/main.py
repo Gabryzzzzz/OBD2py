@@ -6,7 +6,7 @@ import socket
 import os
 import json
 
-from OBD_Handler import motore_prestazioni, consumi_carburante, temperatura_sensori, diagnostica, emissioni
+from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
 
 from config import config as cfg
 
@@ -21,10 +21,20 @@ app = socketio.WSGIApp(sio)
 # eventlet_obd = None
 # eventlet_data = None
 
+
+informazioni_richieste = {
+    "motore": False,
+    "altri_dati": False
+}
+
+
 # Funzione per inviare dati periodicamente
 def send_data():
     while True:
-        motore_prestazioni.leggi_dati(connection, sio)
+        if informazioni_richieste['motore']:
+            motore_prestazioni.leggi_dati(connection, sio)
+        if informazioni_richieste['altri_dati']:
+            altri_dati.leggi_dati(connection, sio)
         # temperatura_sensori.leggi_dati(connection, sio)
         # diagnostica.leggi_dati(connection, sio)
         # emissioni.leggi_dati(connection, sio)
@@ -133,6 +143,15 @@ def request_set_config(sid, data):
     eventlet.sleep(1)
     cfg.reload()
     send_success('Configurazione', 'Configurazione salvata con successo!')
+
+
+#get config
+@sio.on('enable_channel')
+def request_enable_channel(sid, data):
+    print("📤 Abilita canale...")
+    print(data)
+    informazioni_richieste[data['canale']] = data['abilita']
+
 
 #get config
 @sio.on('get_config')

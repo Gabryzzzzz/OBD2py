@@ -1,8 +1,10 @@
-import { Component, inject, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { AltriDatiService } from 'src/app/Services/OBD_Handler/altri_dati.service';
 import {
   motore_prestazioni,
   MotorePrestazioniService,
 } from 'src/app/Services/OBD_Handler/motore_prestazioni.service';
+import { RichiesteCanaliService } from 'src/app/Services/OBD_Handler/richieste_canali.service';
 import { SocketRequestsService } from 'src/app/Services/socketRequests.service';
 import { UtilsService } from 'src/app/Services/utils.service';
 
@@ -20,7 +22,7 @@ export interface cruscotto_configuration {
   styleUrls: ['./cruscotto.component.css'],
   standalone: false,
 })
-export class CruscottoComponent implements OnInit {
+export class CruscottoComponent implements OnInit, OnDestroy {
   maxRpm: number = 7200; // RPM massimo
   rpmPercentage: number = 0; // Altezza della barra
   rpmColor: string = 'green'; // Colore iniziale
@@ -41,6 +43,8 @@ export class CruscottoComponent implements OnInit {
 
   visible_test_page: boolean = false;
 
+  km_A: number = 0;
+
   parse_int = parseInt;
 
   obd_data: motore_prestazioni | undefined;
@@ -55,10 +59,16 @@ export class CruscottoComponent implements OnInit {
 
   constructor(
     private motore: MotorePrestazioniService,
+    private altri_dati_service: AltriDatiService,
     private socket_requests: SocketRequestsService,
+    private abilita_canali_service: RichiesteCanaliService,
     private utils_service: UtilsService
   ) {
     this.setup_configuration();
+  }
+
+  ngOnDestroy(): void {
+    this.abilita_canali_service.abilita_canale("motore", false)
   }
 
   setup_configuration() {
@@ -227,11 +237,17 @@ export class CruscottoComponent implements OnInit {
     }
   }
 
+
+
   ngOnInit(): void {
+    this.abilita_canali_service.abilita_canale('motore', true)
     this.socket_requests.get_local_ip_receiver().subscribe((data) => {
       this.local_ip = data.ip;
     });
     this.get_ips();
+    this.altri_dati_service.getMessage().subscribe((res) => {
+      this.km_A = res.km_percorsi;
+    })
     this.motore.getMessage().subscribe((data) => {
       if (!this.test_mode) {
         // console.log(data);
