@@ -11,6 +11,36 @@ export class SettingsComponent implements OnInit {
 
   config: config_obd | undefined = undefined;
 
+  port_list = [
+    "COM0",
+    "COM1",
+    "COM2",
+    "COM3",
+    "COM4",
+    "/dev/ttyUSB0",
+    "/dev/ttyUSB1",
+    "/dev/ttyUSB2",
+    "/dev/ttyUSB3"
+  ]
+
+  time_config_list = [
+    0,
+    0.1,
+    0.5,
+    1,
+    2,
+    5,
+    10
+  ]
+
+  try_times_list = [
+    1,
+    2,
+    4,
+    6,
+    10
+  ]
+
   constructor(private obd_service: ObdService) { }
 
   ngOnInit() {

@@ -69,6 +69,7 @@ export class CruscottoComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.abilita_canali_service.abilita_canale("motore", false)
+    this.abilita_canali_service.abilita_canale("altri_dati", false)
   }
 
   setup_configuration() {
@@ -241,6 +242,7 @@ export class CruscottoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.abilita_canali_service.abilita_canale('motore', true)
+    this.abilita_canali_service.abilita_canale('altri_dati', true)
     this.socket_requests.get_local_ip_receiver().subscribe((data) => {
       this.local_ip = data.ip;
     });
