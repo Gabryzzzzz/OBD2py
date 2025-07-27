@@ -133,6 +133,12 @@ def send_success(title,message):
     })
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
+@sio.on('test_led')
+def request_ip(sid, data):
+    TMs[1].scroll, "TEST LED"
+
+
+#Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('request_ip')
 def request_ip(sid, data):
     #send local ip to the client

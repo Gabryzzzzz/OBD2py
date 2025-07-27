@@ -11,6 +11,11 @@ export class SocketRequestsService {
   }
 
   //test receiver
+  test_led() {
+    return this.socket.fromEvent<string, any>('test_led');
+  }
+
+  //test receiver
   test_receiver() {
     return this.socket.fromEvent<string, any>('test');
   }
