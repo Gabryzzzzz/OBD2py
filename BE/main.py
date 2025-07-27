@@ -9,7 +9,11 @@ import json
 from OBD_Handler import motore_prestazioni, consumi_carburante, temperatura_sensori, diagnostica, emissioni
 
 from config import config as cfg
+from led_controller import TMs, aggiungi_display
 
+aggiungi_display(23, 24)
+aggiungi_display(25, 8)
+aggiungi_display(7, 1)
 # Abilita WebSocket asincroni
 eventlet.monkey_patch()
 
@@ -95,6 +99,7 @@ def get_ip():
 
 #Funzione per popup di errore per non ripeterla nel codice
 def send_error(title, message):
+    TMs[0].scroll("ERROR: " + message)
     sio.emit('popup_channel', {
         'type': 'error',
         'title': title,
@@ -104,6 +109,7 @@ def send_error(title, message):
 
 #anche per i popup success
 def send_success(title,message):
+    TMs[0].scroll("SUCCESS: " + message)
     sio.emit('popup_channel', {
         'type': 'success',
         'title': title,
