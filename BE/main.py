@@ -135,8 +135,8 @@ def send_success(title,message):
 @sio.on('test_led')
 def test_led(sid, data):
     send_success('TEST LED', 'Inizio test')
-    aggiungi_display(23, 24)
-    TMs[0].scroll, "TEST LED"
+    display = tm1637.TM1637(clk=23, dio=24)
+    display.scroll, "TEST LED"
     send_success('TEST LED', 'Fine test')
 
 
