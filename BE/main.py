@@ -114,7 +114,7 @@ def get_ip():
 
 #Funzione per popup di errore per non ripeterla nel codice
 def send_error(title, message):
-    eventlet.spawn(TMs[0].scroll, "ERROR: " + message)
+    TMs[0].scroll, "ERROR: " + message
     sio.emit('popup_channel', {
         'type': 'error',
         'title': title,
@@ -124,7 +124,7 @@ def send_error(title, message):
 
 #anche per i popup success
 def send_success(title,message):
-    eventlet.spawn(TMs[0].scroll, "SUCCESS: " + message)
+    TMs[1].scroll, "SUCCES: " + message
     sio.emit('popup_channel', {
         'type': 'success',
         'title': title,
