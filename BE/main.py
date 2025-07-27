@@ -9,7 +9,12 @@ import json
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
 
 from config import config as cfg
-from led_controller import TMs, aggiungi_display
+# from led_controller import TMs, aggiungi_display
+import tm1637
+
+TMs = []
+def aggiungi_display(clk, dio):
+    TMs.append(tm1637.TM1637(clk=clk, dio=dio))
 
 aggiungi_display(23, 24)
 aggiungi_display(25, 8)
