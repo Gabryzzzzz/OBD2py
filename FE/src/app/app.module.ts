@@ -42,6 +42,9 @@ import { UtilsService } from './Services/utils.service';
 import { ips } from 'src/assets/ip';
 import { DividerModule } from 'primeng/divider';
 import { ChartModule } from 'primeng/chart';
+import { ResponsiveService } from './Services/responsive.service';
+import { AltriDatiService } from './Services/OBD_Handler/altri_dati.service';
+import { RichiesteCanaliService } from './Services/OBD_Handler/richieste_canali.service';
 
 
 const primaryConfig: SocketIoConfig = {
@@ -92,6 +95,9 @@ const primaryConfig: SocketIoConfig = {
     AlertService,
     MessageService,
     SocketRequestsService,
+    ResponsiveService,
+    AltriDatiService,
+    RichiesteCanaliService,
     UtilsService,
     providePrimeNG({
       theme: {
