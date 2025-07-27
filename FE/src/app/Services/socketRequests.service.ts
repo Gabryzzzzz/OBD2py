@@ -12,7 +12,7 @@ export class SocketRequestsService {
 
   //test receiver
   test_led() {
-    return this.socket.emit('test_led');
+    return this.socket.emit('test_led', "test_led");
   }
 
   //test receiver
