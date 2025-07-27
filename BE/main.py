@@ -16,9 +16,8 @@ TMs = []
 def aggiungi_display(clk, dio):
     TMs.append(tm1637.TM1637(clk=clk, dio=dio))
 
-aggiungi_display(23, 24)
-aggiungi_display(25, 8)
-aggiungi_display(7, 1)
+# aggiungi_display(25, 8)
+# aggiungi_display(7, 1)
 # Abilita WebSocket asincroni
 eventlet.monkey_patch()
 
@@ -135,7 +134,11 @@ def send_success(title,message):
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
 def request_ip(sid, data):
-    TMs[1].scroll, "TEST LED"
+    send_success('TEST LED', 'Inizio test')
+    aggiungi_display(23, 24)
+    TMs[0].scroll, "TEST LED"
+    send_success('TEST LED', 'Fine test')
+
 
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
