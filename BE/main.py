@@ -149,9 +149,9 @@ def setup_display():
             x1, x2 = dividi_numero(acc[0])
             y1, y2 = dividi_numero(acc[0])
             z1, z2 = dividi_numero(acc[0])
-            eventlet.spawn(led.TMs[0].number, x1, x2)
-            eventlet.spawn(led.TMs[1].number, y1, y2)
-            eventlet.spawn(led.TMs[2].number, z1, z2)
+            eventlet.spawn(led.TMs[0].numbers, x1, x2)
+            eventlet.spawn(led.TMs[1].numbers, y1, y2)
+            eventlet.spawn(led.TMs[2].numbers, z1, z2)
             time.sleep(0.1)
 
 
