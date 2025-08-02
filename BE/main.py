@@ -142,13 +142,14 @@ setup_executed = False
 def setup_display():
     if not setup_executed:
         led.setup_led_display()
-        gyroscope.start_gyro()
+        eventlet.spawn(gyroscope.start_gyro)
         time.sleep(1)
         while True:
             acc, gyr, temp = gyroscope.get_info()
             eventlet.spawn(mostra_float, gyroscope.TMs[0], acc[0])
             eventlet.spawn(mostra_float, gyroscope.TMs[1], acc[1])
             eventlet.spawn(mostra_float, gyroscope.TMs[2], acc[2])
+            time.sleep(0.1)
 
 
 def mostra_float(display, valore):
