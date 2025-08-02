@@ -15,6 +15,7 @@ giroscopio = None
 temperatura = None
 
 
+
 def get_info():
     return accelerazione, giroscopio, temperatura
 
