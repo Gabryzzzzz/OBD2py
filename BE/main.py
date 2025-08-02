@@ -147,8 +147,8 @@ def setup_display():
         while True:
             acc, gyr, temp = gyroscope.get_info()
             x1, x2 = dividi_numero(acc[0])
-            y1, y2 = dividi_numero(acc[0])
-            z1, z2 = dividi_numero(acc[0])
+            y1, y2 = dividi_numero(acc[1])
+            z1, z2 = dividi_numero(acc[2])
             eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
             eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
             eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
