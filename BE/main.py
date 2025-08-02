@@ -162,7 +162,7 @@ def setup_display():
                 eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
                 eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
             if data_requested_led == "temp":
-                eventlet.spawn(led.TMs[0].temperature, temp)
+                eventlet.spawn(led.TMs[0].temperature, int(temp))
                 
             time.sleep(0.1)
 
