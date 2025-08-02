@@ -144,8 +144,10 @@ def send_success(title,message):
 def test_led(sid, data):
     send_success('TEST LED', 'Inizio test')
     # os.system("python /home/gabryzzzzz/Documents/led.py")
-    eventlet.spawn(setup_hardware)
+    # eventlet.spawn(setup_hardware)
     # eventlet.spawn(send_message_led)    
+    led.setup_led_display()
+    led.TMs[0].scroll("HELLO!")
     send_success('TEST LED', 'Fine test')
 
 
