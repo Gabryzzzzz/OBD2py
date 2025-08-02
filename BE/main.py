@@ -5,7 +5,7 @@ import socketio
 import socket
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-from BE.gyroscope import gyroscope
+from gyroscope import gyroscope
 from led import led
 
 # TMs = []
