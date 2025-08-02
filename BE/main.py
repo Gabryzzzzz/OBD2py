@@ -155,9 +155,9 @@ def test_led(sid, data):
     time.sleep(2)
     acc, gyr, temp = gyroscope.get_info()
 
-    eventlet.spawn(led.TMs[0].show, acc.accelerazione[0])
-    eventlet.spawn(led.TMs[1].show, acc.accelerazione[1])
-    eventlet.spawn(led.TMs[2].show, acc.accelerazione[2])
+    eventlet.spawn(led.TMs[0].show, acc[0])
+    eventlet.spawn(led.TMs[1].show, acc[1])
+    eventlet.spawn(led.TMs[2].show, acc[2])
     send_success('TEST LED', 'Fine test')
 
 
