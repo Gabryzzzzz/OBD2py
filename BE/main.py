@@ -153,7 +153,10 @@ def test_led(sid, data):
     # os.system("python /home/gabryzzzzz/Documents/led.py")
     # eventlet.spawn(setup_hardware)
     eventlet.spawn(setup_display)
-    eventlet.spawn(led.TMs[0].scroll, gyroscope.accelerazione)
+    time.sleep(2)
+    eventlet.spawn(led.TMs[0].show, gyroscope.accelerazione[0])
+    eventlet.spawn(led.TMs[1].show, gyroscope.accelerazione[1])
+    eventlet.spawn(led.TMs[2].show, gyroscope.accelerazione[2])
     send_success('TEST LED', 'Fine test')
 
 
