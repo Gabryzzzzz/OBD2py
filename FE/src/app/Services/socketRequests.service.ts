@@ -11,8 +11,8 @@ export class SocketRequestsService {
   }
 
   //test receiver
-  test_led() {
-    return this.socket.emit('test_led', "test_led");
+  test_led(data: string) {
+    return this.socket.emit('test_led', data);
   }
 
   //test receiver

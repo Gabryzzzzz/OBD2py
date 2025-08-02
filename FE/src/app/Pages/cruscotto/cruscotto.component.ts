@@ -72,8 +72,8 @@ export class CruscottoComponent implements OnInit, OnDestroy {
     this.abilita_canali_service.abilita_canale("altri_dati", false)
   }
 
-  test_led(){
-    this.socket_requests.test_led();
+  test_led(data: string){
+    this.socket_requests.test_led(data);
   }
 
   setup_configuration() {
