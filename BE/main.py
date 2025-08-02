@@ -3,12 +3,10 @@ import obd
 import eventlet
 import socketio
 import socket
-import os
-import tm1637
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-from gyroscope import start_gyro
-from led import setup_led_display, TMs
+from BE.gyroscope import gyroscope
+from led import led
 
 # TMs = []
 # def aggiungi_display(clk, dio):
@@ -33,14 +31,14 @@ informazioni_richieste = {
 }
 
 def setup_hardware():
-    start_gyro()
-    setup_led_display()
+    gyroscope.start_gyro()
+    led.setup_led_display()
     send_message_led()
 
 def send_message_led():
-    TMs[0].scroll("Display partiti...")
-    TMs[1].scroll("Display partiti...")
-    TMs[2].scroll("Display partiti...")
+    led.TMs[0].scroll("Display partiti...")
+    led.TMs[1].scroll("Display partiti...")
+    led.TMs[2].scroll("Display partiti...")
 
 
 # Funzione per inviare dati periodicamente
