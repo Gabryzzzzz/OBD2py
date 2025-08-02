@@ -14,7 +14,7 @@ accelerazione = None
 giroscopio = None
 temperatura = None
 
-def start():
+def start_gyro():
     while True:
         # Leggi e stampa l'accelerazione
         accelerazione = mpu.acceleration
