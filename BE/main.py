@@ -31,16 +31,6 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
-def setup_hardware():
-    gyroscope.start_gyro()
-    led.setup_led_display()
-    send_message_led()
-
-def send_message_led():
-    acc, gyr, temp = gyroscope.get_info()
-    led.TMs[0].scroll(acc)
-    led.TMs[1].scroll(gyr)
-    led.TMs[2].scroll(temp)
 
 
 # Funzione per inviare dati periodicamente
@@ -295,7 +285,8 @@ def stop_obd(sid):
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-
+    eventlet.spawn(setup_display)
+    time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
