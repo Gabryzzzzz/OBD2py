@@ -139,15 +139,21 @@ def send_success(title,message):
         'timestamp': int(time.time() * 1000)
     })
 
+setup_executed = False
+def setup_display():
+    if not setup_executed:
+        led.setup_led_display()
+        gyroscope.start_gyro()
+
+
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
 def test_led(sid, data):
     send_success('TEST LED', 'Inizio test')
     # os.system("python /home/gabryzzzzz/Documents/led.py")
     # eventlet.spawn(setup_hardware)
-    # eventlet.spawn(send_message_led)    
-    led.setup_led_display()
-    led.TMs[0].scroll("hello")
+    eventlet.spawn(setup_display)
+    eventlet.spawn(led.TMs[0].scroll, gyroscope.accelerazione)
     send_success('TEST LED', 'Fine test')
 
 
