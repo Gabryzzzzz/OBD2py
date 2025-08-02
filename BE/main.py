@@ -4,17 +4,15 @@ import eventlet
 import socketio
 import socket
 import os
-import json
-
-from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-
-from config import config as cfg
-# from led_controller import TMs, aggiungi_display
 import tm1637
+from config import config as cfg
+from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
+from gyroscope import temperatura, accellerazione, giroscopio, start
+from led import setup_led_display, TMs
 
-TMs = []
-def aggiungi_display(clk, dio):
-    TMs.append(tm1637.TM1637(clk=clk, dio=dio))
+# TMs = []
+# def aggiungi_display(clk, dio):
+#     TMs.append(tm1637.TM1637(clk=clk, dio=dio))
 
 # aggiungi_display(25, 8)
 # aggiungi_display(7, 1)
@@ -29,11 +27,21 @@ app = socketio.WSGIApp(sio)
 # eventlet_obd = None
 # eventlet_data = None
 
-
 informazioni_richieste = {
     "motore": False,
     "altri_dati": False
 }
+
+def setup_hardware():
+    start()
+    setup_led_display()
+
+def send_message_led():
+    TMs[0].scroll("Display partiti...")
+    TMs[1].scroll("Display partiti...")
+    TMs[2].scroll("Display partiti...")
+
+
 
 
 # Funzione per inviare dati periodicamente
@@ -135,7 +143,9 @@ def send_success(title,message):
 @sio.on('test_led')
 def test_led(sid, data):
     send_success('TEST LED', 'Inizio test')
-    os.system("python /home/gabryzzzzz/Documents/led.py")
+    # os.system("python /home/gabryzzzzz/Documents/led.py")
+    eventlet.spawn(setup_hardware)
+    eventlet.spawn(send_message_led)    
     send_success('TEST LED', 'Fine test')
 
 
