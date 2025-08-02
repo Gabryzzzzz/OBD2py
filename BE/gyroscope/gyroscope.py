@@ -22,13 +22,16 @@ def get_info():
 def start_gyro():
     while True:
         # Leggi e stampa l'accelerazione
+        global accelerazione 
         accelerazione = mpu.acceleration
         # print("Accelerazione (m/s^2): X=%.2f, Y=%.2f, Z=%.2f" % accelerazione)
         # Leggi e stampa il giroscopio
+        global giroscopio 
         giroscopio = mpu.gyro
         # print("Giroscopio (rad/s): X=%.2f, Y=%.2f, Z=%.2f" % giroscopio)
 
         # Leggi e stampa la temperatura
+        global temperatura
         temperatura = mpu.temperature
         # print("Temperatura (C): %.2f" % temperatura)
         time.sleep(0.1)
