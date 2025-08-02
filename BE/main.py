@@ -147,7 +147,7 @@ def test_led(sid, data):
     # eventlet.spawn(setup_hardware)
     # eventlet.spawn(send_message_led)    
     led.setup_led_display()
-    led.TMs[0].scroll("HELLO!")
+    led.TMs[0].scroll("hello")
     send_success('TEST LED', 'Fine test')
 
 
