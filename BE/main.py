@@ -144,6 +144,18 @@ def setup_display():
         led.setup_led_display()
         gyroscope.start_gyro()
 
+def formatta_valore(numero_float):
+    # 1. Converti il float in una stringa
+    stringa_completa = str(numero_float)
+
+    # 2. Rimuovi il punto decimale dalla stringa
+    senza_punto = stringa_completa.replace('.', '')
+
+    # 3. Prendi le prime 4 cifre della stringa risultante
+    valore_formattato = senza_punto[:4]
+
+    # 4. Restituisci la stringa formattata
+    return valore_formattato
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
@@ -155,9 +167,9 @@ def test_led(sid, data):
     time.sleep(2)
     acc, gyr, temp = gyroscope.get_info()
 
-    eventlet.spawn(led.TMs[0].show, f"{acc[0]:.1f}")
-    eventlet.spawn(led.TMs[1].show, f"{acc[1]:.1f}")
-    eventlet.spawn(led.TMs[2].show, f"{acc[2]:.1f}")
+    eventlet.spawn(led.TMs[0].show, formatta_valore(acc[0]))
+    eventlet.spawn(led.TMs[1].show, formatta_valore(acc[1]))
+    eventlet.spawn(led.TMs[2].show, formatta_valore(acc[2]))
     send_success('TEST LED', 'Fine test')
 
 
