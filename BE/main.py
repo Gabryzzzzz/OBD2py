@@ -7,7 +7,7 @@ import os
 import tm1637
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-from gyroscope import temperatura, accellerazione, giroscopio, start
+from gyroscope import start
 from led import setup_led_display, TMs
 
 # TMs = []
