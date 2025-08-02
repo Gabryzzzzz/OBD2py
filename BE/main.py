@@ -146,39 +146,45 @@ def setup_display():
         time.sleep(1)
         while True:
             acc, gyr, temp = gyroscope.get_info()
-            eventlet.spawn(mostra_float, led.TMs[0], acc[0])
-            eventlet.spawn(mostra_float, led.TMs[1], acc[1])
-            eventlet.spawn(mostra_float, led.TMs[2], acc[2])
+            eventlet.spawn(led.TMs[0].number, dividi_numero(acc[0]), )
+            eventlet.spawn(led.TMs[1].number, dividi_numero(acc[1]), )
+            eventlet.spawn(led.TMs[2].number, dividi_numero(acc[2]), )
             time.sleep(0.1)
 
 
-def mostra_float(display, valore):
-    """
-    Mostra un float con una cifra decimale su un TM1637 (es. 12.3, -1.2)
-    """
-    negativo = valore < 0
-    valore = abs(valore)
-
-    # Riduci a 1 cifra decimale, es: 12.3 → 123
-    intero = int(round(valore * 10))
-
-    if intero > 9999:
-        display.show('----')  # Fuori range
-        return
-
-    # Mostra il numero con il punto
-    display.show_number_dec_ex(
-        intero,
-        0b01000000,  # accende il punto decimale
-        True,        # zfill
-        4            # 4 cifre
-    )
-
-    # Se è negativo e il numero è < 1000, mostra il segno meno
-    if negativo and intero < 1000:
-        digits = list(display.encode(str(intero).zfill(4)))
-        digits[0] = 0x40  # codice del segno meno su TM1637
-        display.write(digits)
+def dividi_numero(valore_float):
+    # 1. Converti il float in una stringa
+    stringa_completa = str(valore_float)
+    
+    # 2. Gestisci i numeri negativi
+    segno = ""
+    if stringa_completa.startswith('-'):
+        segno = "-"
+        # Rimuovi il segno per le operazioni successive
+        stringa_completa = stringa_completa[1:]
+    
+    # 3. Trova la posizione del punto decimale
+    parti = stringa_completa.split('.')
+    
+    # 4. Estrai la parte intera (a sinistra del punto)
+    parte_intera_str = parti[0]
+    
+    # 5. Estrai la parte decimale (a destra del punto)
+    parte_decimale_str = parti[1]
+    
+    # 6. Formatta la parte intera
+    # Se la parte intera è lunga 1, aggiungi uno 0 davanti (es. 1 -> 01)
+    if len(parte_intera_str) < 2:
+        parte_intera_formattata = f"{segno}0{parte_intera_str}"
+    else:
+        parte_intera_formattata = f"{segno}{parte_intera_str}"
+        
+    # 7. Formatta la parte decimale
+    # Assicurati che sia lunga 2, aggiungendo uno 0 se necessario
+    parte_decimale_formattata = parte_decimale_str[:2].ljust(2, '0')
+    
+    # 8. Restituisci le due parti come tuple
+    return parte_intera_formattata, parte_decimale_formattata
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
