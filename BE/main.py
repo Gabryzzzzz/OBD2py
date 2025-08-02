@@ -147,21 +147,21 @@ def setup_display():
         time.sleep(1)
         while True:
             acc, gyr, temp = gyroscope.get_info()
-            if data_requested_led is "acc":
+            if data_requested_led == "acc":
                 x1, x2 = dividi_numero(acc[0])
                 y1, y2 = dividi_numero(acc[1])
                 z1, z2 = dividi_numero(acc[2])
                 eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
                 eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
                 eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
-            if data_requested_led is "gyr":
+            if data_requested_led == "gyr":
                 x1, x2 = dividi_numero(gyr[0])
                 y1, y2 = dividi_numero(gyr[1])
                 z1, z2 = dividi_numero(gyr[2])
                 eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
                 eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
                 eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
-            if data_requested_led is "temp":
+            if data_requested_led == "temp":
                 eventlet.spawn(led.TMs[0].temperature, temp)
                 
             time.sleep(0.1)
