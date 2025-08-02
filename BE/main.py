@@ -25,6 +25,8 @@ app = socketio.WSGIApp(sio)
 # eventlet_obd = None
 # eventlet_data = None
 
+acc, gyr, temp = gyroscope.get_info()
+
 informazioni_richieste = {
     "motore": False,
     "altri_dati": False
@@ -36,9 +38,10 @@ def setup_hardware():
     send_message_led()
 
 def send_message_led():
-    led.TMs[0].scroll("Display partiti...")
-    led.TMs[1].scroll("Display partiti...")
-    led.TMs[2].scroll("Display partiti...")
+    acc, gyr, temp = gyroscope.get_info()
+    led.TMs[0].scroll(acc)
+    led.TMs[1].scroll(gyr)
+    led.TMs[2].scroll(temp)
 
 
 # Funzione per inviare dati periodicamente
