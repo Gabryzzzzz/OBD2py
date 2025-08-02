@@ -143,19 +143,41 @@ def setup_display():
     if not setup_executed:
         led.setup_led_display()
         gyroscope.start_gyro()
+        time.sleep(1)
+        while True:
+            acc, gyr, temp = gyroscope.get_info()
+            eventlet.spawn(mostra_float, gyroscope.TMs[0], acc[0])
+            eventlet.spawn(mostra_float, gyroscope.TMs[1], acc[1])
+            eventlet.spawn(mostra_float, gyroscope.TMs[2], acc[2])
 
-def formatta_valore(numero_float):
-    # 1. Converti il float in una stringa
-    stringa_completa = str(numero_float)
 
-    # 2. Rimuovi il punto decimale dalla stringa
-    senza_punto = stringa_completa.replace('.', '')
+def mostra_float(display, valore):
+    """
+    Mostra un float con una cifra decimale su un TM1637 (es. 12.3, -1.2)
+    """
+    negativo = valore < 0
+    valore = abs(valore)
 
-    # 3. Prendi le prime 4 cifre della stringa risultante
-    valore_formattato = senza_punto[:4]
+    # Riduci a 1 cifra decimale, es: 12.3 → 123
+    intero = int(round(valore * 10))
 
-    # 4. Restituisci la stringa formattata
-    return valore_formattato
+    if intero > 9999:
+        display.show('----')  # Fuori range
+        return
+
+    # Mostra il numero con il punto
+    display.show_number_dec_ex(
+        intero,
+        0b01000000,  # accende il punto decimale
+        True,        # zfill
+        4            # 4 cifre
+    )
+
+    # Se è negativo e il numero è < 1000, mostra il segno meno
+    if negativo and intero < 1000:
+        digits = list(display.encode(str(intero).zfill(4)))
+        digits[0] = 0x40  # codice del segno meno su TM1637
+        display.write(digits)
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
@@ -165,11 +187,7 @@ def test_led(sid, data):
     # eventlet.spawn(setup_hardware)
     eventlet.spawn(setup_display)
     time.sleep(2)
-    acc, gyr, temp = gyroscope.get_info()
-
-    eventlet.spawn(led.TMs[0].show, formatta_valore(acc[0]))
-    eventlet.spawn(led.TMs[1].show, formatta_valore(acc[1]))
-    eventlet.spawn(led.TMs[2].show, formatta_valore(acc[2]))
+    
     send_success('TEST LED', 'Fine test')
 
 
