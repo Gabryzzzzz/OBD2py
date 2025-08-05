@@ -45,6 +45,7 @@ import { ChartModule } from 'primeng/chart';
 import { ResponsiveService } from './Services/responsive.service';
 import { AltriDatiService } from './Services/OBD_Handler/altri_dati.service';
 import { RichiesteCanaliService } from './Services/OBD_Handler/richieste_canali.service';
+import { CruscottoModelComponent } from './Anime/cruscotto-model/cruscotto-model.component';
 
 
 const primaryConfig: SocketIoConfig = {
@@ -61,6 +62,7 @@ const primaryConfig: SocketIoConfig = {
     ProfileComponent,
     SettingsComponent,
     StatisticaComponent,
+    CruscottoModelComponent
   ],
   imports: [
     CardModule,

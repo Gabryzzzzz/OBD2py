@@ -20,6 +20,11 @@ export class SocketRequestsService {
     return this.socket.fromEvent<string, any>('test');
   }
 
+  //test send on channel test
+  get_position() {
+    return this.socket.fromEvent<string, any>('posizione');
+  }
+
   //send local ip request
   get_local_ip() {
     this.socket.emit('request_ip', 'request_ip');

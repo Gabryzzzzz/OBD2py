@@ -38,6 +38,7 @@ def send_data():
     while True:
         if informazioni_richieste['motore']:
             motore_prestazioni.leggi_dati(connection, sio)
+            sio.emit('posizione', gyroscope.get_info())
         if informazioni_richieste['altri_dati']:
             altri_dati.leggi_dati(connection, sio)
         # temperatura_sensori.leggi_dati(connection, sio)
