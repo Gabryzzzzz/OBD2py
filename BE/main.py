@@ -256,23 +256,24 @@ def request_get_config(sid):
 #Restart obd configuration
 @sio.on('restart_obd')
 def restart_obd(sid):
-    global eventlet_obd, eventlet_data, eventlet_posizione
+    global eventlet_obd, eventlet_data
+        # , eventlet_posizione
     print("🔄 Ricevuto segnale di riavvio OBD...")
 
     # Termina i thread esistenti se attivi
     if eventlet_obd and not eventlet_obd.dead:
         eventlet_obd.kill()
-        eventlet_posizione.kill()
+        # eventlet_posizione.kill()
         print("❌ Thread OBD terminato.")
 
     if eventlet_data and not eventlet_data.dead:
         eventlet_data.kill()
-        eventlet_posizione.kill()
+        # eventlet_posizione.kill()
         print("❌ Thread invio dati terminato.")
 
     # Avvia nuovamente la configurazione OBD
     eventlet_obd = eventlet.spawn(configure_obd)
-    eventlet_posizione = eventlet.spawn(send_gyroscope_data)
+    # eventlet_posizione = eventlet.spawn(send_gyroscope_data)
     send_success('OBD Restart', 'OBD riavviato con successo!')
     
 #stop obd configuration
@@ -284,12 +285,12 @@ def stop_obd(sid):
     # Termina i thread esistenti se attivi
     if eventlet_obd and not eventlet_obd.dead:
         eventlet_obd.kill()
-        eventlet_posizione.kill()
+        # eventlet_posizione.kill()
         print("❌ Thread OBD terminato.")
 
     if eventlet_data and not eventlet_data.dead:
         eventlet_data.kill()
-        eventlet_posizione.kill()
+        # eventlet_posizione.kill()
         print("❌ Thread invio dati terminato.")
     
     send_success('OBD Stop', 'OBD fermato con successo!')
