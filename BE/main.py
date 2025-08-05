@@ -31,6 +31,12 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
+def send_gyroscope_data():
+    while True:
+        if informazioni_richieste['motore']:
+            acc, gyr, temp = gyroscope.get_info()
+            sio.emit('posizione', [ acc, gyr, temp ])
+
 
 # Funzione per inviare dati periodicamente
 def send_data():
@@ -250,20 +256,23 @@ def request_get_config(sid):
 #Restart obd configuration
 @sio.on('restart_obd')
 def restart_obd(sid):
-    global eventlet_obd, eventlet_data
+    global eventlet_obd, eventlet_data, eventlet_posizione
     print("🔄 Ricevuto segnale di riavvio OBD...")
 
     # Termina i thread esistenti se attivi
     if eventlet_obd and not eventlet_obd.dead:
         eventlet_obd.kill()
+        eventlet_posizione.kill()
         print("❌ Thread OBD terminato.")
 
     if eventlet_data and not eventlet_data.dead:
         eventlet_data.kill()
+        eventlet_posizione.kill()
         print("❌ Thread invio dati terminato.")
 
     # Avvia nuovamente la configurazione OBD
     eventlet_obd = eventlet.spawn(configure_obd)
+    eventlet_posizione = eventlet.spawn(send_gyroscope_data)
     send_success('OBD Restart', 'OBD riavviato con successo!')
     
 #stop obd configuration
@@ -275,18 +284,21 @@ def stop_obd(sid):
     # Termina i thread esistenti se attivi
     if eventlet_obd and not eventlet_obd.dead:
         eventlet_obd.kill()
+        eventlet_posizione.kill()
         print("❌ Thread OBD terminato.")
 
     if eventlet_data and not eventlet_data.dead:
         eventlet_data.kill()
+        eventlet_posizione.kill()
         print("❌ Thread invio dati terminato.")
     
     send_success('OBD Stop', 'OBD fermato con successo!')
 
 # Avvia il server
 if __name__ == '__main__':
-    global eventlet_obd
+    global eventlet_obd, eventlet_posizione
     eventlet.spawn(setup_display)
+    eventlet_posizione = eventlet.spawn(send_gyroscope_data)
     time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
