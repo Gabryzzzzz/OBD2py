@@ -17,6 +17,9 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private cube!: THREE.Mesh;
 
+  accellerazione: {x: string, y: string, z: string} = {x: "", y: "", z: ""}
+  giroscopio: {x: string, y: string, z: string} = {x: "", y: "", z: ""}
+
   private animationId: any;
 
   constructor(public socket_service: SocketRequestsService){

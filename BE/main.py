@@ -32,13 +32,13 @@ informazioni_richieste = {
 }
 
 
-
 # Funzione per inviare dati periodicamente
 def send_data():
     while True:
         if informazioni_richieste['motore']:
             motore_prestazioni.leggi_dati(connection, sio)
-            sio.emit('posizione', gyroscope.get_info())
+            acc, gyr, temp = gyroscope.get_info()
+            sio.emit('posizione', { acc, gyr, temp })
         if informazioni_richieste['altri_dati']:
             altri_dati.leggi_dati(connection, sio)
         # temperatura_sensori.leggi_dati(connection, sio)
