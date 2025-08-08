@@ -135,8 +135,8 @@ def setup_display():
     if not setup_executed:
         led.setup_led_display()
         eventlet.spawn(gyroscope.start_gyro)
-        time.sleep(0.1)
         while True:
+            time.sleep(0.1)
             try:
                 acc, gyr, temp = gyroscope.get_info()
                 if data_requested_led == "acc":
@@ -155,7 +155,7 @@ def setup_display():
                     eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
                 if data_requested_led == "temp":
                     eventlet.spawn(led.TMs[0].temperature, int(temp))
-                time.sleep(0.3)
+                # time.sleep(0.3)
             finally:
                 print("Errore durante setup shcermo")
 
@@ -293,7 +293,7 @@ def stop_obd(sid):
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    # eventlet.spawn(setup_display)
+    eventlet.spawn(setup_display)
     # time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
