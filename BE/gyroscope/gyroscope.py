@@ -24,7 +24,7 @@ def send_info(sio):
 def get_info():
     return accelerazione_ext, giroscopio_ext, temperatura_ext
 
-def start_gyro(sio):
+def start_gyro():
     global temperatura_ext, accelerazione_ext, giroscopio_ext
     # time.sleep(3)
     while True:
@@ -51,6 +51,6 @@ def start_gyro(sio):
             # accelerazione_ext[1] = ay
             # accelerazione_ext[2] = az
             # # time.sleep(0.1)
-            sio.emit('posizione', [ mpu.temperature, mpu.acceleration, mpu.gyro ])
+            # sio.emit('posizione', [ mpu.temperature, mpu.acceleration, mpu.gyro ])
         except:
             print("HELP!!")
