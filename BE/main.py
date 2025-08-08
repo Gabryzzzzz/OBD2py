@@ -205,7 +205,7 @@ def test_led(sid, data):
     # eventlet.spawn(setup_hardware)
     global data_requested_led
     data_requested_led = data
-    eventlet.spawn(setup_display)
+    # eventlet.spawn(setup_display)
     time.sleep(2)
     send_success('TEST LED', 'Fine test')
 
@@ -290,8 +290,8 @@ def stop_obd(sid):
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    eventlet.spawn(setup_display)
     time.sleep(2)
+    eventlet.spawn(setup_display)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
