@@ -215,7 +215,7 @@ def test_led(sid, data):
     # eventlet.spawn(setup_hardware)
     global data_requested_led
     data_requested_led = data
-    # eventlet.spawn(setup_display)
+    eventlet.spawn(setup_display)
     time.sleep(2)
     send_success('TEST LED', 'Fine test')
 
@@ -307,7 +307,7 @@ if __name__ == '__main__':
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
-    eventlet.spawn(setup_display) 
+    # eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
     print("📤 IP locale:", ip)
