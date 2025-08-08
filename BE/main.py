@@ -31,6 +31,10 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
+def send_pos_info():
+    while True:
+        acc, gyr, temp = gyroscope.get_info()
+        sio.emit('posizione', [ acc, gyr, temp ])
 
 # Funzione per inviare dati periodicamente
 def send_data():
@@ -155,7 +159,7 @@ def setup_display():
                 if data_requested_led == "temp":
                     eventlet.spawn(led.TMs[0].temperature, int(temp))
                 # time.sleep(0.3)
-            finally:
+            except:
                 print("Errore durante setup shcermo")
                 time.sleep(1)
 
@@ -295,6 +299,7 @@ def stop_obd(sid):
 if __name__ == '__main__':
     global eventlet_obd
     eventlet.spawn(setup_display)
+    eventlet.spawn(send_pos_info)
     time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
