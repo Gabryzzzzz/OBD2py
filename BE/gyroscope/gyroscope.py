@@ -51,6 +51,6 @@ def start_gyro(sio):
             # accelerazione_ext[1] = ay
             # accelerazione_ext[2] = az
             # # time.sleep(0.1)
-            sio.emit('posizione', [ accelerazione_ext, giroscopio_ext, temperatura_ext ])
+            sio.emit('posizione', [ mpu.temperature, mpu.acceleration, mpu.gyro ])
         except:
             print("HELP!!")
