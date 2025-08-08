@@ -31,11 +31,6 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
-def send_pos_info():
-    while True:
-        acc, gyr, temp = gyroscope.get_info()
-        sio.emit('posizione', [ acc, gyr, temp ])
-
 # Funzione per inviare dati periodicamente
 def send_data():
     while True:
@@ -137,9 +132,9 @@ data_requested_led = "acc"
 setup_executed = False
 def setup_display():
     if not setup_executed:
-        time.sleep(1)
+        # time.sleep(1)
         led.setup_led_display()
-        eventlet.spawn(gyroscope.start_gyro, sio)
+        # eventlet.spawn(gyroscope.start_gyro, sio)
         # eventlet.spawn(send_pos_info)
         while True:
             try:
