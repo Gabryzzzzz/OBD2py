@@ -155,8 +155,9 @@ def setup_display():
                     eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
                 if data_requested_led == "temp":
                     eventlet.spawn(led.TMs[0].temperature, int(temp))
-            except:
+            finally:
                 time.sleep(1)
+                print("Errore durante setup shcermo")
             
                 
 
