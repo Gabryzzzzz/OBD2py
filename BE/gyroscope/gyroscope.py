@@ -23,6 +23,7 @@ def get_info():
 
 def start_gyro():
     global temperatura_ext, accelerazione_ext, giroscopio_ext, gyro_threshold, last_time
+    time.sleep(3)
     while True:
          # Calcola delta time
         now = time.time()
