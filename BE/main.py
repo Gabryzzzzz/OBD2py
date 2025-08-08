@@ -31,13 +31,18 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
+def send_gyroscope_data():
+    while True:
+        if informazioni_richieste['motore']:
+            acc, gyr, temp = gyroscope.get_info()
+            sio.emit('posizione', [ acc, gyr, temp ])
+
 # Funzione per inviare dati periodicamente
 def send_data():
     while True:
         if informazioni_richieste['motore']:
             motore_prestazioni.leggi_dati(connection, sio)
-            # acc, gyr, temp = gyroscope.get_info()
-            # sio.emit('posizione', [ acc, gyr, temp ])
+            acc, gyr, temp = gyroscope.get_info()
         if informazioni_richieste['altri_dati']:
             altri_dati.leggi_dati(connection, sio)
         # temperatura_sensori.leggi_dati(connection, sio)
@@ -292,7 +297,9 @@ def stop_obd(sid):
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    # time.sleep(2)
+    eventlet.spawn(setup_display)
+    eventlet.spawn(send_gyroscope_data)
+    time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
