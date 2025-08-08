@@ -71,25 +71,14 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
 
   private rotation = { x: 0, y: 0, z: 0 };
 
-  private gyroscopeThreshold = 0.00; // soglia di sensibilità (tune this)
-  private lastTimestamp = performance.now();
-
   private animate = () => {
-    const now = performance.now();
-    const deltaTime = (now - this.lastTimestamp) / 1000; // in secondi
-    this.lastTimestamp = now;
 
     this.animationId = requestAnimationFrame(this.animate);
 
-    // Applica soglia (deadzone) al giroscopio
-    const gyroX = Math.abs(this.dati_movimento.giroscopio.x) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.x : 0;
-    const gyroY = Math.abs(this.dati_movimento.giroscopio.y) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.y : 0;
-    const gyroZ = Math.abs(this.dati_movimento.giroscopio.z) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.z : 0;
-
     // Integra la rotazione nel tempo
-    this.rotation.x += gyroX * deltaTime;
-    this.rotation.y += gyroY * deltaTime;
-    this.rotation.z += gyroZ * deltaTime;
+    this.rotation.x = this.dati_movimento.giroscopio.x;
+    this.rotation.y = this.dati_movimento.giroscopio.y;
+    this.rotation.z = this.dati_movimento.giroscopio.z;
 
     this.cube.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
 
