@@ -24,7 +24,7 @@ def send_info(sio):
 def get_info():
     return accelerazione_ext, giroscopio_ext, temperatura_ext
 
-def start_gyro():
+def start_gyro(sio):
     global temperatura_ext, accelerazione_ext, giroscopio_ext, gyro_threshold, last_time
     # time.sleep(3)
     while True:
@@ -35,12 +35,10 @@ def start_gyro():
             delta_time = now - last_time
             last_time = now
 
-            accelerazione = mpu.acceleration
-            giroscopio = mpu.gyro
             temperatura_ext = mpu.temperature
 
-            gx, gy, gz = giroscopio
-            ax, ay, az = accelerazione
+            gx, gy, gz = mpu.gyro
+            ax, ay, az = mpu.acceleration
 
             # Applica deadzone
             gx = gx if abs(gx) > gyro_threshold else 0
@@ -57,5 +55,7 @@ def start_gyro():
             accelerazione_ext[1] = ay
             accelerazione_ext[2] = az
             # time.sleep(0.1)
+            sio.emit('posizione', [ accelerazione_ext, giroscopio_ext, temperatura_ext ])
+
         except:
             print("HELP!!")
