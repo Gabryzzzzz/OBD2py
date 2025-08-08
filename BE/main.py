@@ -176,26 +176,29 @@ def dividi_numero(valore_float):
     
     # 3. Trova la posizione del punto decimale
     parti = stringa_completa.split('.')
-    
-    # 4. Estrai la parte intera (a sinistra del punto)
-    parte_intera_str = parti[0]
-    
-    # 5. Estrai la parte decimale (a destra del punto)
-    parte_decimale_str = parti[1]
-    
-    # 6. Formatta la parte intera
-    # Se la parte intera è lunga 1, aggiungi uno 0 davanti (es. 1 -> 01)
-    if len(parte_intera_str) < 2:
-        parte_intera_formattata = f"{segno}0{parte_intera_str}"
-    else:
-        parte_intera_formattata = f"{segno}{parte_intera_str}"
+    if len(parti) > 0:
+
+        # 4. Estrai la parte intera (a sinistra del punto)
+        parte_intera_str = parti[0]
         
-    # 7. Formatta la parte decimale
-    # Assicurati che sia lunga 2, aggiungendo uno 0 se necessario
-    parte_decimale_formattata = parte_decimale_str[:2].ljust(2, '0')
-    
-    # 8. Restituisci le due parti come tuple
-    return parte_intera_formattata, parte_decimale_formattata
+        # 5. Estrai la parte decimale (a destra del punto)
+        parte_decimale_str = parti[1]
+        
+        # 6. Formatta la parte intera
+        # Se la parte intera è lunga 1, aggiungi uno 0 davanti (es. 1 -> 01)
+        if len(parte_intera_str) < 2:
+            parte_intera_formattata = f"{segno}0{parte_intera_str}"
+        else:
+            parte_intera_formattata = f"{segno}{parte_intera_str}"
+            
+        # 7. Formatta la parte decimale
+        # Assicurati che sia lunga 2, aggiungendo uno 0 se necessario
+        parte_decimale_formattata = parte_decimale_str[:2].ljust(2, '0')
+        
+        # 8. Restituisci le due parti come tuple
+        return parte_intera_formattata, parte_decimale_formattata
+    else:
+        return "00", "00"
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
