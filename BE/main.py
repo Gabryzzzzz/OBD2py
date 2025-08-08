@@ -139,6 +139,9 @@ def setup_display():
     if not setup_executed:
         led.setup_led_display()
         eventlet.spawn(gyroscope.start_gyro)
+        time.sleep(1)
+        eventlet.spawn(send_pos_info)
+
         while True:
             try:
                 acc, gyr, temp = gyroscope.get_info()
@@ -299,7 +302,6 @@ def stop_obd(sid):
 if __name__ == '__main__':
     global eventlet_obd
     eventlet.spawn(setup_display)
-    eventlet.spawn(send_pos_info)
     time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
