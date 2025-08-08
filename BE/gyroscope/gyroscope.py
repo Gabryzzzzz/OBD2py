@@ -2,6 +2,7 @@ import board
 import adafruit_mpu6050
 import busio
 import time
+import math
 
 last_time = time.time()
 
@@ -49,3 +50,5 @@ def start_gyro():
         accelerazione_ext[0] = ax
         accelerazione_ext[1] = ay
         accelerazione_ext[2] = az
+
+        time.sleep(10)
