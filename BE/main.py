@@ -136,7 +136,7 @@ def setup_display():
         led.setup_led_display()
         eventlet.spawn(gyroscope.start_gyro)
         while True:
-            time.sleep(0.1)
+            time.sleep(1)
             try:
                 acc, gyr, temp = gyroscope.get_info()
                 if data_requested_led == "acc":
