@@ -37,8 +37,8 @@ def send_data():
     while True:
         if informazioni_richieste['motore']:
             motore_prestazioni.leggi_dati(connection, sio)
-            acc, gyr, temp = gyroscope.get_info()
-            sio.emit('posizione', [ acc, gyr, temp ])
+            # acc, gyr, temp = gyroscope.get_info()
+            # sio.emit('posizione', [ acc, gyr, temp ])
         if informazioni_richieste['altri_dati']:
             altri_dati.leggi_dati(connection, sio)
         # temperatura_sensori.leggi_dati(connection, sio)
@@ -136,7 +136,6 @@ def setup_display():
         led.setup_led_display()
         eventlet.spawn(gyroscope.start_gyro)
         while True:
-            time.sleep(1)
             try:
                 acc, gyr, temp = gyroscope.get_info()
                 if data_requested_led == "acc":
