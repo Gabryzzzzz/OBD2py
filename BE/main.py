@@ -158,43 +158,43 @@ def setup_display():
                 time.sleep(0.3)
             finally:
                 print("Errore durante setup shcermo")
-            
-                
+
+
 
 
 
 def dividi_numero(valore_float):
     # 1. Converti il float in una stringa
     stringa_completa = str(valore_float)
-    
+
     # 2. Gestisci i numeri negativi
     segno = ""
     if stringa_completa.startswith('-'):
         segno = "-"
         # Rimuovi il segno per le operazioni successive
         stringa_completa = stringa_completa[1:]
-    
+
     # 3. Trova la posizione del punto decimale
     parti = stringa_completa.split('.')
     if len(parti) > 1:
 
         # 4. Estrai la parte intera (a sinistra del punto)
         parte_intera_str = parti[0]
-        
+
         # 5. Estrai la parte decimale (a destra del punto)
         parte_decimale_str = parti[1]
-        
+
         # 6. Formatta la parte intera
         # Se la parte intera è lunga 1, aggiungi uno 0 davanti (es. 1 -> 01)
         if len(parte_intera_str) < 2:
             parte_intera_formattata = f"{segno}0{parte_intera_str}"
         else:
             parte_intera_formattata = f"{segno}{parte_intera_str}"
-            
+
         # 7. Formatta la parte decimale
         # Assicurati che sia lunga 2, aggiungendo uno 0 se necessario
         parte_decimale_formattata = parte_decimale_str[:2].ljust(2, '0')
-        
+
         # 8. Restituisci le due parti come tuple
         return parte_intera_formattata, parte_decimale_formattata
     else:
@@ -230,7 +230,7 @@ def request_ip(sid, data):
 def request_set_config(sid, data):
     #send local ip to the client
     print("📤 Configurazione ricevuta dal client...")
-    print(data) 
+    print(data)
     with open('config.json', 'w') as f:
         f.write(data)
     eventlet.sleep(1)
@@ -272,7 +272,7 @@ def restart_obd(sid):
     # Avvia nuovamente la configurazione OBD
     eventlet_obd = eventlet.spawn(configure_obd)
     send_success('OBD Restart', 'OBD riavviato con successo!')
-    
+
 #stop obd configuration
 @sio.on('stop_obd')
 def stop_obd(sid):
@@ -287,14 +287,14 @@ def stop_obd(sid):
     if eventlet_data and not eventlet_data.dead:
         eventlet_data.kill()
         print("❌ Thread invio dati terminato.")
-    
+
     send_success('OBD Stop', 'OBD fermato con successo!')
 
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    eventlet.spawn(setup_display)
-    time.sleep(2)
+    # eventlet.spawn(setup_display)
+    # time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
