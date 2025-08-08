@@ -137,10 +137,10 @@ data_requested_led = "acc"
 setup_executed = False
 def setup_display():
     if not setup_executed:
+        time.sleep(1)
         led.setup_led_display()
         eventlet.spawn(gyroscope.start_gyro)
-        time.sleep(1)
-        # eventlet.spawn(send_pos_info)
+        eventlet.spawn(send_pos_info)
         while True:
             try:
                 acc, gyr, temp = gyroscope.get_info()
@@ -307,7 +307,7 @@ if __name__ == '__main__':
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
-    # eventlet.spawn(setup_display)
+    eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
     print("📤 IP locale:", ip)
