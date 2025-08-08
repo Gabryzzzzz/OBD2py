@@ -300,14 +300,14 @@ def stop_obd(sid):
 
 # Avvia il server
 if __name__ == '__main__':
-    global eventlet_obd, eventlet_pos
+    global eventlet_obd
     # time.sleep(2)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
-    eventlet_pos = eventlet.spawn(setup_display)
+    eventlet.spawn(setup_display)
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
     print("📤 IP locale:", ip)
