@@ -299,7 +299,6 @@ def stop_obd(sid):
     send_success('OBD Stop', 'OBD fermato con successo!')
 
 
-eventlet_pos = None
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd, eventlet_pos
