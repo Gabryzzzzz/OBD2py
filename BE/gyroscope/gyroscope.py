@@ -2,9 +2,6 @@ import board
 import adafruit_mpu6050
 import busio
 import time
-import math
-
-last_time = time.time()
 
 # Inizializza l'interfaccia I2C usando i pin del Raspberry Pi
 # 'board.SCL' e 'board.SDA' sono i nomi standard dei pin I2C
@@ -13,44 +10,26 @@ i2c = busio.I2C(board.SCL, board.SDA)
 # Crea un oggetto MPU6050. Il sensore è pronto per essere usato.
 mpu = adafruit_mpu6050.MPU6050(i2c)
 
-accelerazione_ext = [0, 0, 0]
-giroscopio_ext = [0, 0, 0]
-gyro_threshold = 0.01  # deadzone
-temperatura_ext = 0
-
-def send_info(sio):
-    sio.emit('posizione', [ accelerazione_ext, giroscopio_ext, temperatura_ext ])
+accelerazione = None
+giroscopio = None
+temperatura = None
 
 def get_info():
-    return accelerazione_ext, giroscopio_ext, temperatura_ext
+    return accelerazione, giroscopio, temperatura
 
 def start_gyro():
-    global temperatura_ext, accelerazione_ext, giroscopio_ext
-    # time.sleep(3)
     while True:
-        try:
-            temperatura_ext = mpu.temperature
-            accelerazione_ext = mpu.acceleration
-            temperatura_ext = mpu.gyro
+        # Leggi e stampa l'accelerazione
+        global accelerazione 
+        accelerazione = mpu.acceleration
+        # print("Accelerazione (m/s^2): X=%.2f, Y=%.2f, Z=%.2f" % accelerazione)
+        # Leggi e stampa il giroscopio
+        global giroscopio 
+        giroscopio = mpu.gyro
+        # print("Giroscopio (rad/s): X=%.2f, Y=%.2f, Z=%.2f" % giroscopio)
 
-            # gx, gy, gz = mpu.gyro
-            # ax, ay, az = mpu.acceleration
-
-            # # Applica deadzone
-            # gx = gx if abs(gx) > gyro_threshold else 0
-            # gy = gy if abs(gy) > gyro_threshold else 0
-            # gz = gz if abs(gz) > gyro_threshold else 0
-
-            # # Integra la rotazione
-            # giroscopio_ext[0] += gx * delta_time
-            # giroscopio_ext[1] += gy * delta_time
-            # giroscopio_ext[2] += gz * delta_time
-
-            # # Integra la rotazione
-            # accelerazione_ext[0] = ax
-            # accelerazione_ext[1] = ay
-            # accelerazione_ext[2] = az
-            # # time.sleep(0.1)
-            # sio.emit('posizione', [ mpu.temperature, mpu.acceleration, mpu.gyro ])
-        except:
-            print("HELP!!")
+        # Leggi e stampa la temperatura
+        global temperatura
+        temperatura = mpu.temperature
+        # print("Temperatura (C): %.2f" % temperatura)
+        time.sleep(0.1)
