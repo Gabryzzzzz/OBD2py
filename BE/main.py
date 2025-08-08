@@ -300,9 +300,9 @@ def stop_obd(sid):
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    # eventlet.spawn(setup_display)
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
+    eventlet.spawn(setup_display)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")

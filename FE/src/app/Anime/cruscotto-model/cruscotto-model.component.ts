@@ -71,7 +71,7 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
 
   private rotation = { x: 0, y: 0, z: 0 };
 
-  private gyroscopeThreshold = 0.01; // soglia di sensibilità (tune this)
+  private gyroscopeThreshold = 0.005; // soglia di sensibilità (tune this)
   private lastTimestamp = performance.now();
 
   private animate = () => {
@@ -87,15 +87,15 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
     const gyroZ = Math.abs(this.dati_movimento.giroscopio.z) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.z : 0;
 
     // Integra la rotazione nel tempo
-    this.rotation.x += gyroX * deltaTime;
-    this.rotation.y += gyroY * deltaTime;
+    this.rotation.x += -gyroX * deltaTime;
+    this.rotation.y += -gyroY * deltaTime;
     this.rotation.z += gyroZ * deltaTime;
 
     this.cube.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
 
     // Applica traslazioni basate sull'accelerazione (scalo per visibilità)
     // this.cube.position.x = this.dati_movimento.accelerometro.x * 0.5;
-    // this.cube.position.y = this.dati_movimento.accelerometro.y * 0.5;
+    // this.cube.position.y = this.dati_movimento.accelerometro.y * 0.1;
     // this.cube.position.z = this.dati_movimento.accelerometro.z * 0.2;
 
     this.renderer.render(this.scene, this.camera);
