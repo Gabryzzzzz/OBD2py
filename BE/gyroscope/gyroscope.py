@@ -25,15 +25,10 @@ def get_info():
     return accelerazione_ext, giroscopio_ext, temperatura_ext
 
 def start_gyro(sio):
-    global temperatura_ext, accelerazione_ext, giroscopio_ext, gyro_threshold, last_time
+    global temperatura_ext, accelerazione_ext, giroscopio_ext
     # time.sleep(3)
     while True:
         try:
-            # time.sleep(0.3)
-            # Calcola delta time
-            now = time.time()
-            delta_time = now - last_time
-            last_time = now
 
             temperatura_ext = mpu.temperature
             accelerazione_ext = mpu.acceleration
