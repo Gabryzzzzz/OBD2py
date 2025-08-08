@@ -134,7 +134,7 @@ def setup_display():
     if not setup_executed:
         # time.sleep(1)
         led.setup_led_display()
-        eventlet.spawn(gyroscope.start_gyro, sio)
+        # eventlet.spawn(gyroscope.start_gyro, sio)
         # eventlet.spawn(send_pos_info)
         while True:
             try:

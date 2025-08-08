@@ -29,7 +29,6 @@ def start_gyro(sio):
     # time.sleep(3)
     while True:
         try:
-
             temperatura_ext = mpu.temperature
             accelerazione_ext = mpu.acceleration
             temperatura_ext = mpu.gyro
