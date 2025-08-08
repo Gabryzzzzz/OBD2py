@@ -157,6 +157,8 @@ def setup_display():
                 # time.sleep(0.3)
             finally:
                 print("Errore durante setup shcermo")
+                time.sleep(1)
+
 
 
 

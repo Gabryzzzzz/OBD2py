@@ -16,7 +16,7 @@ mpu = adafruit_mpu6050.MPU6050(i2c)
 accelerazione_ext = [0, 0, 0]
 giroscopio_ext = [0, 0, 0]
 gyro_threshold = 0.01  # deadzone
-temperatura_ext = None
+temperatura_ext = 0
 
 def get_info():
     return accelerazione_ext, giroscopio_ext, temperatura_ext
