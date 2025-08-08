@@ -33,9 +33,10 @@ informazioni_richieste = {
 
 def send_gyroscope_data():
     while True:
-        if informazioni_richieste['motore']:
-            acc, gyr, temp = gyroscope.get_info()
-            sio.emit('posizione', [ acc, gyr, temp ])
+        time.sleep(0.1)
+        acc, gyr, temp = gyroscope.get_info()
+        sio.emit('posizione', [ acc, gyr, temp ])
+            
 
 # Funzione per inviare dati periodicamente
 def send_data():
