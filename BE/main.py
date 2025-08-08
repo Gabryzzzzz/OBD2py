@@ -176,7 +176,7 @@ def dividi_numero(valore_float):
     
     # 3. Trova la posizione del punto decimale
     parti = stringa_completa.split('.')
-    if len(parti) > 0:
+    if len(parti) > 1:
 
         # 4. Estrai la parte intera (a sinistra del punto)
         parte_intera_str = parti[0]
