@@ -9,11 +9,13 @@ import { dati_movimento } from 'src/app/Models/Interfaces/gyroscope.interface';
 import { SocketRequestsService } from 'src/app/Services/socketRequests.service';
 import { UtilsService } from 'src/app/Services/utils.service';
 import * as THREE from 'three';
-import { throttleTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cruscotto-model',
-  templateUrl: './cruscotto-model.component.html',
+  template: `<canvas
+    #canvas
+    style="width: 100%; height: 100%; display: block;"
+  ></canvas>`,
   styleUrl: './cruscotto-model.component.css',
   standalone: false,
 })
@@ -26,14 +28,14 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private cube!: THREE.Mesh;
 
-  accelerazione: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
+  accellerazione: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
   giroscopio: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
   dati_movimento: dati_movimento = new dati_movimento();
 
   private animationId: any;
 
   constructor(public socket_service: SocketRequestsService) {
-    socket_service.get_position().pipe(throttleTime(10)).subscribe((x) => {
+    socket_service.get_position().subscribe((x) => {
       console.log('posizione', x);
       this.dati_movimento.set_data(x);
       console.log('dati convertiti', this.dati_movimento);
@@ -64,14 +66,12 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
     // }, 300);
 
     // Inizia animazione
-    // this.animate();
     this.animate();
   }
 
   private rotation = { x: 0, y: 0, z: 0 };
 
-
-  private gyroscopeThreshold = 0.00; // soglia di sensibilità (tune this)
+  private gyroscopeThreshold = 0.01; // soglia di sensibilità (tune this)
   private lastTimestamp = performance.now();
 
   private animate = () => {
@@ -90,6 +90,15 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
     this.rotation.x += gyroX * deltaTime;
     this.rotation.y += gyroY * deltaTime;
     this.rotation.z += gyroZ * deltaTime;
+
+    this.cube.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+
+    // Applica traslazioni basate sull'accelerazione (scalo per visibilità)
+    // this.cube.position.x = this.dati_movimento.accelerometro.x * 0.5;
+    // this.cube.position.y = this.dati_movimento.accelerometro.y * 0.5;
+    // this.cube.position.z = this.dati_movimento.accelerometro.z * 0.2;
+
+    this.renderer.render(this.scene, this.camera);
   }
 
   ngOnDestroy() {

@@ -33,7 +33,7 @@ informazioni_richieste = {
 
 def send_gyroscope_data():
     while True:
-        time.sleep(0.1)
+        time.sleep(0.01)
         acc, gyr, temp = gyroscope.get_info()
         sio.emit('posizione', [ acc, gyr, temp ])
             
