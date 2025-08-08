@@ -27,7 +27,6 @@ def start_gyro():
         global giroscopio 
         giroscopio = mpu.gyro
         # print("Giroscopio (rad/s): X=%.2f, Y=%.2f, Z=%.2f" % giroscopio)
-
         # Leggi e stampa la temperatura
         global temperatura
         temperatura = mpu.temperature

@@ -31,11 +31,11 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
-def send_gyroscope_data():
-    while True:
-        if informazioni_richieste['motore']:
-            acc, gyr, temp = gyroscope.get_info()
-            sio.emit('posizione', [ acc, gyr, temp ])
+# def send_gyroscope_data():
+#     while True:
+#         if informazioni_richieste['motore']:
+#             acc, gyr, temp = gyroscope.get_info()
+#             sio.emit('posizione', [ acc, gyr, temp ])
 
 # Funzione per inviare dati periodicamente
 def send_data():
@@ -43,6 +43,7 @@ def send_data():
         if informazioni_richieste['motore']:
             motore_prestazioni.leggi_dati(connection, sio)
             acc, gyr, temp = gyroscope.get_info()
+            sio.emit('posizione', [ acc, gyr, temp ])
         if informazioni_richieste['altri_dati']:
             altri_dati.leggi_dati(connection, sio)
         # temperatura_sensori.leggi_dati(connection, sio)
@@ -139,7 +140,7 @@ def setup_display():
     if not setup_executed:
         # time.sleep(1)
         led.setup_led_display()
-        eventlet.spawn(gyroscope.start_gyro)
+        # eventlet.spawn(gyroscope.start_gyro)
         # eventlet.spawn(send_pos_info)
         while True:
             acc, gyr, temp = gyroscope.get_info()
