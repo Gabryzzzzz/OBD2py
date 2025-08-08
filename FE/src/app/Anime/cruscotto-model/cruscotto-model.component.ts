@@ -9,13 +9,11 @@ import { dati_movimento } from 'src/app/Models/Interfaces/gyroscope.interface';
 import { SocketRequestsService } from 'src/app/Services/socketRequests.service';
 import { UtilsService } from 'src/app/Services/utils.service';
 import * as THREE from 'three';
+import { throttleTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-cruscotto-model',
-  template: `<canvas
-    #canvas
-    style="width: 100%; height: 100%; display: block;"
-  ></canvas>`,
+  templateUrl: './cruscotto-model.component.html',
   styleUrl: './cruscotto-model.component.css',
   standalone: false,
 })
@@ -28,14 +26,14 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private cube!: THREE.Mesh;
 
-  accellerazione: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
+  accelerazione: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
   giroscopio: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
   dati_movimento: dati_movimento = new dati_movimento();
 
   private animationId: any;
 
   constructor(public socket_service: SocketRequestsService) {
-    socket_service.get_position().subscribe((x) => {
+    socket_service.get_position().pipe(throttleTime(10)).subscribe((x) => {
       console.log('posizione', x);
       this.dati_movimento.set_data(x);
       console.log('dati convertiti', this.dati_movimento);
@@ -66,12 +64,14 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
     // }, 300);
 
     // Inizia animazione
+    // this.animate();
     this.animate();
   }
 
   private rotation = { x: 0, y: 0, z: 0 };
 
   private animate = () => {
+    console.log("animate");
 
     this.animationId = requestAnimationFrame(this.animate);
 

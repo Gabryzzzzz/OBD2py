@@ -51,4 +51,4 @@ def start_gyro():
         accelerazione_ext[1] = ay
         accelerazione_ext[2] = az
 
-        time.sleep(10)
+        time.sleep(50)
