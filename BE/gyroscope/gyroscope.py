@@ -36,26 +36,27 @@ def start_gyro(sio):
             last_time = now
 
             temperatura_ext = mpu.temperature
+            accelerazione_ext = mpu.acceleration
+            temperatura_ext = mpu.gyro
 
-            gx, gy, gz = mpu.gyro
-            ax, ay, az = mpu.acceleration
+            # gx, gy, gz = mpu.gyro
+            # ax, ay, az = mpu.acceleration
 
-            # Applica deadzone
-            gx = gx if abs(gx) > gyro_threshold else 0
-            gy = gy if abs(gy) > gyro_threshold else 0
-            gz = gz if abs(gz) > gyro_threshold else 0
+            # # Applica deadzone
+            # gx = gx if abs(gx) > gyro_threshold else 0
+            # gy = gy if abs(gy) > gyro_threshold else 0
+            # gz = gz if abs(gz) > gyro_threshold else 0
 
-            # Integra la rotazione
-            giroscopio_ext[0] += gx * delta_time
-            giroscopio_ext[1] += gy * delta_time
-            giroscopio_ext[2] += gz * delta_time
+            # # Integra la rotazione
+            # giroscopio_ext[0] += gx * delta_time
+            # giroscopio_ext[1] += gy * delta_time
+            # giroscopio_ext[2] += gz * delta_time
 
-            # Integra la rotazione
-            accelerazione_ext[0] = ax
-            accelerazione_ext[1] = ay
-            accelerazione_ext[2] = az
-            # time.sleep(0.1)
+            # # Integra la rotazione
+            # accelerazione_ext[0] = ax
+            # accelerazione_ext[1] = ay
+            # accelerazione_ext[2] = az
+            # # time.sleep(0.1)
             sio.emit('posizione', [ accelerazione_ext, giroscopio_ext, temperatura_ext ])
-
         except:
             print("HELP!!")
