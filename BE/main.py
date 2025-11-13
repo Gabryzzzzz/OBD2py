@@ -161,7 +161,10 @@ def setup_display():
                 eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
                 eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
             if data_requested_led == "temp":
-                eventlet.spawn(led.TMs[0].temperature, int(connection.query((obd.commands.COOLANT_TEMP))))
+                while True:
+                    if connection.is_connected():
+                        eventlet.spawn(led.TMs[0].temperature, int(connection.query((obd.commands.COOLANT_TEMP))))
+                        break
                 eventlet.spawn(led.TMs[1].temperature, int(temp))
             time.sleep(0.3)
 
@@ -307,13 +310,16 @@ if __name__ == '__main__':
     global eventlet_obd
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
-    data_requested_led = cfg.LED_CONFIG
-    eventlet.spawn(setup_display)
+
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
+
+    data_requested_led = cfg.LED_CONFIG
+    eventlet.spawn(setup_display)
+
     # eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
