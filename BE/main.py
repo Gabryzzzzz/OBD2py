@@ -25,7 +25,7 @@ app = socketio.WSGIApp(sio)
 # eventlet_obd = None
 # eventlet_data = None
 
-connection = None
+# connection = None
 
 informazioni_richieste = {
     "motore": False,
@@ -44,7 +44,7 @@ def send_data():
     eventlet.spawn(send_gyroscope_data)
     while True:
         if informazioni_richieste['motore']:
-            motore_prestazioni.leggi_dati(connection, sio)
+            motore_prestazioni.leggi_dati(connection, sio, cfg, led)
             # acc, gyr, temp = gyroscope.get_info()
             # sio.emit('posizione', [ acc, gyr, temp ])
         if informazioni_richieste['altri_dati']:
@@ -140,7 +140,6 @@ def send_success(title,message):
 data_requested_led = "acc"
 setup_executed = False
 def setup_display():
-    global connection
     if not setup_executed:
         # time.sleep(1)
         led.setup_led_display()
@@ -163,12 +162,6 @@ def setup_display():
                 eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
                 eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
             if data_requested_led == "temp":
-                connection_ = connection
-                if connection_ is not None:
-                    while True:
-                        if connection.is_connected():
-                            eventlet.spawn(led.TMs[0].temperature, int(connection.query((obd.commands.COOLANT_TEMP))))
-                            break
                 eventlet.spawn(led.TMs[1].temperature, int(temp))
             time.sleep(0.3)
 

@@ -2,7 +2,7 @@ import obd
 import random
 from config import config as cfg
 
-def leggi_dati(connection, sio):
+def leggi_dati(connection, sio, cfg, led):
     comandi = {
         "rpm": obd.commands.RPM,
         "velocita": obd.commands.SPEED,
@@ -13,10 +13,11 @@ def leggi_dati(connection, sio):
 
     #se non è connesso simulare i dati
     if not connection.is_connected():
-        simula_dati(sio)
+        simula_dati(sio, cfg, led)
     else:
         #leggi e formatta i vari dati per avere interi
         dati = {}
+        led.TMs[1].temperature(int(connection.query(obd.commands.COOLANT_TEMP)))
         for nome, comando in comandi.items():
             try:
                 risposta = connection.query(comando)
@@ -27,7 +28,7 @@ def leggi_dati(connection, sio):
         if cfg.SHOW_PRINTS:
             print(f"📤 Motore: {dati}")
 
-def simula_dati(sio):
+def simula_dati(sio, cfg, led):
     # step_speed = 5  # Incremento per la velocità
     # step_rpm = 300  # Incremento per gli RPM
     # step_throttle = 5  # Incremento per la posizione dell'accelleratore
@@ -38,6 +39,8 @@ def simula_dati(sio):
         "pressione_map": random.randint(0, 100),
         "flusso_maf": random.randint(0, 100)
     }
+    if cfg.LED_CONFIG == "temp":
+        led.TMs[1].temperature(int(random.randint(0, 100)))
     sio.emit('motore', dati)
     if cfg.SHOW_PRINTS:
         print(f"📤 Motore: {dati}")
