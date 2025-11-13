@@ -310,6 +310,7 @@ if __name__ == '__main__':
     global eventlet_obd
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
+    eventlet.spawn(setup_display)
 
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
@@ -318,7 +319,6 @@ if __name__ == '__main__':
     eventlet_obd = eventlet.spawn(configure_obd)
 
     data_requested_led = cfg.LED_CONFIG
-    eventlet.spawn(setup_display)
 
     # eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
