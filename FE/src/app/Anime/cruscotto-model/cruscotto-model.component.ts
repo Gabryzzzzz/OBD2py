@@ -71,7 +71,7 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
 
   private rotation = { x: 0, y: 0, z: 0 };
 
-  private gyroscopeThreshold = 0.005; // soglia di sensibilità (tune this)
+  private gyroscopeThreshold = 0.1; // soglia di sensibilità (tune this)
   private lastTimestamp = performance.now();
 
   private animate = () => {
@@ -82,14 +82,14 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
     this.animationId = requestAnimationFrame(this.animate);
 
     // Applica soglia (deadzone) al giroscopio
-    const gyroX = Math.abs(this.dati_movimento.giroscopio.x) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.x : 0;
-    const gyroY = Math.abs(this.dati_movimento.giroscopio.y) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.y : 0;
-    const gyroZ = Math.abs(this.dati_movimento.giroscopio.z) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.z : 0;
+    const gyroX = Math.abs(this.dati_movimento.giroscopio.x) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.x + this.gyroscopeThreshold : 0;
+    const gyroY = Math.abs(this.dati_movimento.giroscopio.y) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.y + this.gyroscopeThreshold : 0;
+    const gyroZ = Math.abs(this.dati_movimento.giroscopio.z) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.z + this.gyroscopeThreshold : 0;
 
     // Integra la rotazione nel tempo
-    this.rotation.x += -gyroX * deltaTime;
-    this.rotation.y += -gyroY * deltaTime;
-    this.rotation.z += gyroZ * deltaTime;
+    this.rotation.x += -(gyroX) * deltaTime;
+    this.rotation.y += -(gyroY) * deltaTime;
+    this.rotation.z += (gyroZ) * deltaTime;
 
     this.cube.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
 
