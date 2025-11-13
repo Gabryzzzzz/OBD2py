@@ -17,7 +17,7 @@ def leggi_dati(connection, sio, cfg, led):
     else:
         #leggi e formatta i vari dati per avere interi
         dati = {}
-        led.TMs[1].temperature(int(connection.query(obd.commands.COOLANT_TEMP)))
+        led.TMs[0].temperature(int(connection.query(obd.commands.COOLANT_TEMP)))
         for nome, comando in comandi.items():
             try:
                 risposta = connection.query(comando)
