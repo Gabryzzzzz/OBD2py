@@ -28,7 +28,7 @@ app = socketio.WSGIApp(sio)
 # connection = None
 
 informazioni_richieste = {
-    "motore": False,
+    "motore": True,
     "altri_dati": False
 }
 
