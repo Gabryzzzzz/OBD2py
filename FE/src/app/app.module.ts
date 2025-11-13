@@ -61,8 +61,8 @@ const primaryConfig: SocketIoConfig = {
     MediaComponent,
     ProfileComponent,
     SettingsComponent,
-    StatisticaComponent,
-    CruscottoModelComponent
+    StatisticaComponent
+    // CruscottoModelComponent
   ],
   imports: [
     CardModule,
