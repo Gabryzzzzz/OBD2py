@@ -161,7 +161,8 @@ def setup_display():
                 eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
                 eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
             if data_requested_led == "temp":
-                eventlet.spawn(led.TMs[0].temperature, int(temp))
+                eventlet.spawn(led.TMs[0].temperature, int(connection.query((obd.commands.COOLANT_TEMP))))
+                eventlet.spawn(led.TMs[1].temperature, int(temp))
             time.sleep(0.3)
 
 
@@ -237,6 +238,10 @@ def request_set_config(sid, data):
     #send local ip to the client
     print("📤 Configurazione ricevuta dal client...")
     print(data)
+
+    if data.LED_CONFIG is not cfg.LED_CONFIG:
+        setup_display()
+
     with open('config.json', 'w') as f:
         f.write(data)
     eventlet.sleep(1)
@@ -302,6 +307,7 @@ if __name__ == '__main__':
     global eventlet_obd
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
+    data_requested_led = cfg.LED_CONFIG
     eventlet.spawn(setup_display)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")

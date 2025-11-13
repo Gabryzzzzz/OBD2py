@@ -45,4 +45,5 @@ export interface config_obd {
   TRY_TIMES: number;
   TRY_SLEEP: number;
   TRY_ENABLED: boolean;
+  LED_CONFIG: string;
 }

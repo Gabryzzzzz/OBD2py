@@ -16,6 +16,7 @@ class Config:
         self.TRY_TIMES = config['TRY_TIMES']
         self.TRY_SLEEP = config['TRY_SLEEP']
         self.TRY_ENABLED = config['TRY_ENABLED']
+        self.LED_CONFIG = config['LED_CONFIG']
     #reload configuration with json
     def reload(self):
         with open('config.json') as f:
@@ -26,6 +27,7 @@ class Config:
             self.TRY_TIMES = config['TRY_TIMES']
             self.TRY_SLEEP = config['TRY_SLEEP']
             self.TRY_ENABLED = config['TRY_ENABLED']
+            self.LED_CONFIG = config['LED_CONFIG']
     
 
 #take the config from the json
