@@ -91,7 +91,7 @@ def configure_obd():
             connection.close() # Close the failed connection before trying the next
             connection = None
 
-    if connection.is_connected():
+    if connection: # Check if the connection object exists, not if it's connected (it will be if it exists)
         print("✅ Connessione OBD riuscita!")
         # sio.emit('popup_channel', {
         #     'type': 'success',
