@@ -314,13 +314,13 @@ def controller_ps3():
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
     print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
-    # while True:
-    #     # Get all available events from the gamepad
-    #     try:
-    #         events = get_gamepad()
-    #     except Exception:
-    #         print("Gamepad not found. Please connect a gamepad.")
-    #         break
+    while True:
+        # Get all available events from the gamepad
+        try:
+            events = get_gamepad()
+        except Exception:
+            print("Gamepad not found. Please connect a gamepad.")
+            break
 
     #     for event in events:
     #         # Update the stick state when an 'Absolute' event is received
