@@ -1,7 +1,8 @@
 from inputs import get_gamepad
+from time import sleep
 
 def controller_ps3():
-
+    sleep(5)
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
 
