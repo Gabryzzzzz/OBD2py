@@ -29,8 +29,8 @@ sio = socketio.Server(cors_allowed_origins="*")
 app = socketio.WSGIApp(sio)
 
 #variabili per tenere traccia degli eventlet generati per configure obd e send data
-# eventlet_obd = None
-# eventlet_data = None
+eventlet_obd = None
+eventlet_data = None
 
 # connection = None
 
@@ -377,7 +377,7 @@ def monitor_controller_log():
 
 # Avvia il server
 if __name__ == '__main__':
-    global eventlet_obd
+    # global eventlet_obd # This is not needed here as it's already global
 
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
