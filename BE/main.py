@@ -310,13 +310,12 @@ def stop_obd(sid):
 
 
 def controller_ps3():
-    # global data_requested_led
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
-    # print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
+    print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
     while True:
-        eventlet.sleep(0.01) # Use eventlet's non-blocking sleep
-
+        # Use a small sleep to prevent the loop from consuming 100% CPU in its own thread.
+        time.sleep(0.01)
         # Get all available events from the gamepad
         try:
             events = get_gamepad()
@@ -380,8 +379,8 @@ def controller_ps3():
                 button_states[event.code] = event.state
 
 def launch_ps3():
-    # Launch with eventlet for better integration with the async environment
-    eventlet.spawn(controller_ps3)
+    # Run the blocking controller loop in a separate thread to avoid blocking eventlet
+    threading.Thread(target=controller_ps3, daemon=True).start()
 
 # Avvia il server
 if __name__ == '__main__':
