@@ -317,7 +317,8 @@ def controller_ps3():
     while True:
         # Get all available events from the gamepad
         try:
-            events = get_gamepad()
+            # events = get_gamepad()
+            print("Controller active. Press a button or move the stick.")
         except Exception:
             print("Gamepad not found. Please connect a gamepad.")
             break
