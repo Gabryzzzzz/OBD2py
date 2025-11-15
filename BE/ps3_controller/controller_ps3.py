@@ -74,9 +74,9 @@ def main():
                         print(message.strip())
                         log_file.write(message)
                         log_file.flush()
-                        inputs.devices = inputs.DeviceManager() # Re-initialize the device manager to rescan for devices
+                        time.sleep(1) # Give the OS a moment to clean up stale device files
+                        inputs.devices = inputs.DeviceManager() # Re-initialize to rescan for devices
                         is_connected = False # This will break the event loop and go back to the connection loop
-                        time.sleep(1) # Small delay before starting reconnection attempts
     except KeyboardInterrupt:
         print("\nExiting program.")
 
