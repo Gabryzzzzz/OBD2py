@@ -43,9 +43,9 @@ def simula_dati(sio, cfg, led):
         "flusso_maf": random.randint(0, 100)
     }
     if cfg.LED_CONFIG == "motore":
-        led.TMs[0].temperature(int(random.randint(0, 100)))
-        led.TMs[1].temperature(int(dati["velocita"]))
-        led.TMs[2].temperature(int(dati["rpm"]))
+        led.TMs[0].temperature(int(random.randint(0, 99)))
+        led.TMs[1].number(int(dati["velocita"]))
+        led.TMs[2].number(int(dati["rpm"]))
     sio.emit('motore', dati)
     if cfg.SHOW_PRINTS:
         print(f"📤 Motore: {dati}")
