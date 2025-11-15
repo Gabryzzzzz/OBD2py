@@ -193,7 +193,7 @@ def setup_display():
             if data_requested_led == "temp":
                 # eventlet.spawn(led.TMs[1].temperature, int(temp))
                 pass
-            time.sleep(0.3)
+            time.sleep(0.1)
 
 
 
@@ -358,6 +358,11 @@ def monitor_controller_log():
                                 current_config = json.load(f_config)
                             current_config['LED_CONFIG'] = data_requested_led
                             update_config_file(current_config)
+                        elif command == 'RETRY_OBD_CONNECTION':
+                            print("🎮 Comando ricevuto: Riprova connessione OBD.")
+                            send_info("Controller", "Riprova connessione OBD...")
+                            led.scroll_all("OBD-RETRY") # Display message on LEDs
+                            restart_obd(None) # Call the existing restart function
                         else:
                             print(f"🎮 Comando ricevuto dal controller: {command}")
                             send_info("🎮 Comando ricevuto dal controller", f"{command}")

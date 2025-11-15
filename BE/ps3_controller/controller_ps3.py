@@ -74,6 +74,11 @@ def main():
                                 print("X button pressed. Logging CYCLE_LED_MODE.")
                                 log_file.write(message)
                                 log_file.flush()
+                            elif event.code == 'BTN_WEST': # Square button
+                                message = "RETRY_OBD_CONNECTION\n"
+                                print("West button pressed. Logging RETRY_OBD_CONNECTION.")
+                                log_file.write(message)
+                                log_file.flush()
                             else:
                                 message = f"{event.code}\n"
                                 print(message.strip())
