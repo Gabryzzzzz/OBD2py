@@ -10,6 +10,7 @@ from led import led
 from inputs import get_gamepad
 import os
 import threading
+import subprocess
 
 # TMs = []
 # def aggiungi_display(clk, dio):
@@ -323,9 +324,18 @@ if __name__ == '__main__':
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
     eventlet.spawn(setup_display)
-    send_info("Avvio Servizi", "🎮 Avvio controller PS3...")
-    # launch with os command the ps3_controller script without interrupt the execution
-    os.system("python3 ps3_controller/controller_ps3.py")
+
+    # Check if the controller process is already running to avoid duplicates
+    check_process = subprocess.run(["pgrep", "-f", "ps3_controller.py"], capture_output=True)
+    if check_process.returncode == 0:
+        pid = check_process.stdout.decode().strip()
+        send_info("Avvio Servizi", f"🎮 Controller PS3 già in esecuzione (PID: {pid}).")
+        print(f"🎮 Controller PS3 già in esecuzione (PID: {pid}).")
+    else:
+        send_info("Avvio Servizi", "🎮 Avvio controller PS3...")
+        # Launch the PS3 controller script as a non-blocking background process
+        subprocess.Popen(["python3", "ps3_controller/controller_ps3.py"])
+
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
