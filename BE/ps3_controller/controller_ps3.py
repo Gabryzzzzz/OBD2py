@@ -1,4 +1,4 @@
-from inputs import get_gamepad
+import inputs
 import time
 import sys
 
@@ -25,7 +25,7 @@ def main():
                 is_connected = False
                 while not is_connected:
                     try:
-                        get_gamepad() # This will raise an exception if no gamepad is found
+                        inputs.get_gamepad() # This will raise an exception if no gamepad is found
                         is_connected = True
                         print("✅ Gamepad connected successfully.")
                     except Exception:
@@ -35,7 +35,7 @@ def main():
                 # --- Event Processing Loop ---
                 while is_connected:
                     try:
-                        events = get_gamepad()
+                        events = inputs.get_gamepad()
                         for event in events:
                             # Update the stick state when an 'Absolute' event is received
                             if event.ev_type == 'Absolute':
@@ -74,6 +74,7 @@ def main():
                         print(message.strip())
                         log_file.write(message)
                         log_file.flush()
+                        inputs.devices.rescan() # Force the library to look for new devices
                         is_connected = False # This will break the event loop and go back to the connection loop
                         time.sleep(1) # Small delay before starting reconnection attempts
     except KeyboardInterrupt:
