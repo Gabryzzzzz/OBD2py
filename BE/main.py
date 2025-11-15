@@ -325,6 +325,7 @@ def monitor_controller_log():
     """
     print("🎮 Avvio monitoraggio log controller...")
     while True:
+        eventlet.sleep(1) # Check the file every 100ms
         try:
             # Open the file for reading and writing
             with open(CONTROLLER_LOG_PATH, "r+") as f:
@@ -336,7 +337,7 @@ def monitor_controller_log():
                     # Ignore session start messages
                     if command and not command.startswith("---"):
                         print(f"🎮 Comando ricevuto dal controller: {command}")
-                        sio.emit('controller_event', {'button': command})
+                        send_info("🎮 Comando ricevuto dal controller", f"{command}")
 
                     # Go back to the start of the file and overwrite it with the remaining lines
                     f.seek(0)
