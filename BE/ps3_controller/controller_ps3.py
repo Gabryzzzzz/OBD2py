@@ -69,12 +69,12 @@ def main():
                                         print("West button pressed. Logging RETRY_OBD_CONNECTION.")
                                         log_file.write(message)
                                         log_file.flush()
-                                    elif event.code == 'BTN_D_UP':
+                                    elif event.code == 'BTN_DPAD_UP':
                                         message = "INTERVAL_UP\n"
                                         print("D-pad UP pressed. Logging INTERVAL_UP.")
                                         log_file.write(message)
                                         log_file.flush()
-                                    elif event.code == 'BTN_D_DOWN':
+                                    elif event.code == 'BTN_DPAD_DOWN':
                                         message = "INTERVAL_DOWN\n"
                                         print("D-pad DOWN pressed. Logging INTERVAL_DOWN.")
                                         log_file.write(message)
