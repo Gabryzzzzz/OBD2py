@@ -387,6 +387,27 @@ def monitor_controller_log():
                             send_info("Controller", "Riprova connessione OBD...")
                             led.TMs[0].scroll("OBD-RETRY") # Display message on LEDs
                             restart_obd(None) # Call the existing restart function
+                        elif command in ('INTERVAL_UP', 'INTERVAL_DOWN'):
+                            with open('config.json', 'r') as f_config:
+                                current_config = json.load(f_config)
+                            
+                            current_interval = current_config.get('UPDATE_INTERVAL', 0.1)
+                            
+                            if command == 'INTERVAL_UP':
+                                # Decrease interval for faster updates, with a minimum of 0.05s
+                                new_interval = max(0.1, current_interval - 0.1)
+                                action_text = "aumentata"
+                            else: # INTERVAL_DOWN
+                                # Increase interval for slower updates
+                                new_interval = current_interval + 0.1
+                                action_text = "diminuita"
+                            
+                            current_config['UPDATE_INTERVAL'] = round(new_interval, 2)
+                            update_config_file(current_config)
+                            
+                            message = f"Frequenza di aggiornamento {action_text} a {current_config['UPDATE_INTERVAL']}s"
+                            print(f"🎮 {message}")
+                            send_success('Controller', message)
                         else:
                             print(f"🎮 Comando ricevuto dal controller: {command}")
                             send_info("🎮 Comando ricevuto dal controller", f"{command}")
