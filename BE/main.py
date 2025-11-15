@@ -313,7 +313,7 @@ def controller_ps3():
     # global data_requested_led
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
-    print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
+    # print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
     while True:
         time.sleep(0.01)
 
@@ -321,7 +321,7 @@ def controller_ps3():
         try:
             events = get_gamepad()
         except Exception:
-            print("Gamepad not found. Please connect a gamepad.")
+            # print("Gamepad not found. Please connect a gamepad.")
             break
 
         for event in events:
@@ -338,12 +338,15 @@ def controller_ps3():
                 # D-PAD: Check for transition from 0 (released) to not 0 (pressed)
                 if event.code in ('ABS_HAT0X', 'ABS_HAT0Y'):
                     if event.state != 0 and prev_state == 0:
-                        print(f"D-Pad {event.code} pressed with value: {event.state}")
+                        # print(f"D-Pad {event.code} pressed with value: {event.state}")
+                        pass
 
                 # TRIGGERS: Check for transition from 0 to a pressed state
                 if event.code in ('ABS_Z', 'ABS_RZ'): # Corresponds to LT/L2 and RT/R2
                     if event.state > 0 and prev_state == 0:
-                        print(f"Trigger {event.code} was pressed")
+                        # print(f"Trigger {event.code} was pressed")
+                        pass
+
 
                 button_states[event.code] = event.state
             # Handle button presses
@@ -353,12 +356,18 @@ def controller_ps3():
                 # Check if the button is being pressed now and was released before
                 if event.state == 1 and prev_state == 0:
                     if event.code == 'BTN_START':
-                        print("Start button pressed")
+                        # print("Start button pressed")
+                        pass
+
                     elif event.code == 'BTN_SELECT':
-                        print("Select button pressed")
+                        # print("Select button pressed")
+                        pass
+
                     else:
                         if event.code == 'BTN_SOUTH':
-                            print("X button pressed, cycling LED config")
+                            # print("X button pressed, cycling LED config")
+                            pass
+
                             # if data_requested_led == "acc":
                             #     data_requested_led = "gyr"
                             # elif data_requested_led == "gyr":
@@ -367,7 +376,7 @@ def controller_ps3():
                             #     data_requested_led = "acc"
                             # send_success('LED Config', f'LED display now showing: {data_requested_led}')
 
-                        print(f"Button {event.code} was pressed")
+                        # print(f"Button {event.code} was pressed")
                 button_states[event.code] = event.state
 
 def launch_ps3():
