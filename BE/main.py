@@ -370,7 +370,7 @@ def monitor_controller_log():
                             if data_requested_led == "acc":
                                 data_requested_led = "gyr"
                             elif data_requested_led == "gyr":
-                                data_requested_led = "temp"
+                                data_requested_led = "motore"
                             else: # Covers 'temp' and any other state
                                 data_requested_led = "acc"
                             
