@@ -149,6 +149,8 @@ def send_error(title, message):
     # This assumes the scroll() method accepts a 'delay' keyword argument in milliseconds.
     delay = max(100, 250 - len(sanitized_message) * 5) # Ensure delay is at least 100ms
 
+    led.TMs[1].write([0, 0, 0, 0])
+    led.TMs[2].write([0, 0, 0, 0])
     led.TMs[0].scroll(sanitized_message, delay=delay)
 
     sio.emit('popup_channel', {
