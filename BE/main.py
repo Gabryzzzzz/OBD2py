@@ -400,7 +400,7 @@ if __name__ == '__main__':
     time.sleep(2)
     eventlet.spawn(setup_display)
     send_info("Avvio Servizi", "🎮 Avvio controller PS3...")
-    launch_ps3()
+    # launch_ps3()
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
