@@ -153,8 +153,8 @@ def send_info(title, message):
 data_requested_led = "acc"
 setup_executed = False
 def setup_display():
+    global setup_executed
     if not setup_executed:
-        global setup_executed
         setup_executed = True
         led.setup_led_display()
         # eventlet.spawn(gyroscope.start_gyro)
@@ -199,10 +199,9 @@ def dividi_numero(valore_float: float) -> tuple[str, str]:
 @sio.on('test_led')
 def test_led(sid, data):
     send_success('TEST LED', 'Inizio test')
-    # os.system("python /home/gabryzzzzz/Documents/led.py")
-    # eventlet.spawn(setup_hardware)
     global data_requested_led
     data_requested_led = data
+    # Spawning setup_display is sufficient, no need to call it directly if it's already running
     eventlet.spawn(setup_display)
     time.sleep(2)
     send_success('TEST LED', 'Fine test')
