@@ -9,6 +9,7 @@ from gyroscope import gyroscope
 from led import led
 from inputs import get_gamepad
 import os
+import threading
 
 
 
@@ -380,8 +381,10 @@ def controller_ps3():
                 button_states[event.code] = event.state
 
 def launch_ps3():
-    eventlet.spawn(controller_ps3)
-
+    #launch with classic thread
+    threading.Thread(target=controller_ps3).start()
+    #launch with eventlet
+    # eventlet.spawn(controller_ps3)
 
 
 # Avvia il server
