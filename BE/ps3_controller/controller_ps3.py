@@ -69,6 +69,11 @@ def main():
                                 log_file.write("EXIT_BY_START_BUTTON\n")
                                 log_file.flush()
                                 sys.exit(0) # Exit the program cleanly
+                            elif event.code == 'BTN_SOUTH': # 'X' button
+                                message = "CYCLE_LED_MODE\n"
+                                print("X button pressed. Logging CYCLE_LED_MODE.")
+                                log_file.write(message)
+                                log_file.flush()
                             else:
                                 message = f"{event.code}\n"
                                 print(message.strip())

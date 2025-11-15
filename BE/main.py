@@ -323,9 +323,9 @@ def monitor_controller_log():
     Monitors the controller log file for new commands, sends them via WebSocket,
     and removes the processed line from the file.
     """
+    global data_requested_led
     print("🎮 Avvio monitoraggio log controller...")
     while True:
-        eventlet.sleep(1) # Check the file every 100ms
         try:
             # Open the file for reading and writing
             with open(CONTROLLER_LOG_PATH, "r+") as f:
@@ -336,8 +336,21 @@ def monitor_controller_log():
                     
                     # Ignore session start messages
                     if command and not command.startswith("---"):
-                        print(f"🎮 Comando ricevuto dal controller: {command}")
-                        send_info("🎮 Comando ricevuto dal controller", f"{command}")
+                        if command == 'CYCLE_LED_MODE':
+                            # Cycle through the LED display modes
+                            if data_requested_led == "acc":
+                                data_requested_led = "gyr"
+                            elif data_requested_led == "gyr":
+                                data_requested_led = "temp"
+                            else: # Covers 'temp' and any other state
+                                data_requested_led = "acc"
+                            
+                            message = f"Modalità display LED cambiata in: {data_requested_led.upper()}"
+                            print(f"🎮 {message}")
+                            send_success('Controller', message)
+                        else:
+                            print(f"🎮 Comando ricevuto dal controller: {command}")
+                            send_info("🎮 Comando ricevuto dal controller", f"{command}")
 
                     # Go back to the start of the file and overwrite it with the remaining lines
                     f.seek(0)
