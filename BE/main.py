@@ -11,6 +11,7 @@ from inputs import get_gamepad
 import os
 import threading
 import subprocess
+import json
 
 CONTROLLER_LOG_PATH = "controller_log.txt"
 
@@ -152,6 +153,18 @@ def send_info(title, message):
         'timestamp': int(time.time() * 1000)
     })
 
+def update_config_file(config_data):
+    """Writes the given data object to the config.json file and reloads the config."""
+    try:
+        with open('config.json', 'w') as f:
+            json.dump(config_data, f, indent=4)
+        cfg.reload()
+        send_success('Configurazione', 'Configurazione salvata con successo!')
+        print("💾 Configurazione salvata.")
+    except Exception as e:
+        print(f"❌ Errore durante il salvataggio della configurazione: {e}")
+        send_error("Config Error", "Impossibile salvare la configurazione.")
+
 
 data_requested_led = "acc"
 setup_executed = False
@@ -237,7 +250,6 @@ def test_led(sid, data):
     send_success('TEST LED', 'Fine test')
 
 
-
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('request_ip')
 def request_ip(sid, data):
@@ -255,15 +267,8 @@ def request_set_config(sid, data):
     #send local ip to the client
     print("📤 Configurazione ricevuta dal client...")
     print(data)
-
-    if data.LED_CONFIG is not cfg.LED_CONFIG:
-        setup_display()
-
-    with open('config.json', 'w') as f:
-        f.write(data)
-    eventlet.sleep(1)
-    cfg.reload()
-    send_success('Configurazione', 'Configurazione salvata con successo!')
+    config_object = json.loads(data)
+    update_config_file(config_object) # This function is defined above
 
 
 #get config
@@ -348,6 +353,11 @@ def monitor_controller_log():
                             message = f"Modalità display LED cambiata in: {data_requested_led.upper()}"
                             print(f"🎮 {message}")
                             send_success('Controller', message)
+                            # Get current config, edit, and save
+                            with open('config.json', 'r') as f:
+                                current_config = json.load(f)
+                            current_config['LED_CONFIG'] = data_requested_led
+                            update_config_file(current_config)
                         else:
                             print(f"🎮 Comando ricevuto dal controller: {command}")
                             send_info("🎮 Comando ricevuto dal controller", f"{command}")
