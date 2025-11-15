@@ -376,7 +376,7 @@ if __name__ == '__main__':
     time.sleep(2)
     eventlet.spawn(setup_display)
     print("🎮 Avvio controller PS3")
-    eventlet.spawn(controller_ps3)
+    ps3_eventlet = eventlet.spawn(controller_ps3)
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
