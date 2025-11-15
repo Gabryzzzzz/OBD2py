@@ -367,8 +367,7 @@ def controller_ps3():
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    print("🎮 Avvio controller PS3")
-    # eventlet.spawn(controller_ps3)
+
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
     eventlet.spawn(setup_display)
@@ -391,4 +390,6 @@ if __name__ == '__main__':
     template = template.replace('PLACEHOLDER', ip)
     with open('../FE/src/assets/ip.ts', 'w') as f:
         f.write(template)
+        print("🎮 Avvio controller PS3")
+    eventlet.spawn(controller_ps3)
     eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
