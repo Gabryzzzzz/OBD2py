@@ -4,7 +4,7 @@ from inputs import get_gamepad
 STICK_DEADZONE = 4000 
 
 
-def main():
+def controller_ps3():
 
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}

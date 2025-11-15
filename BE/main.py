@@ -8,6 +8,10 @@ from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temp
 from gyroscope import gyroscope
 from led import led
 from inputs import get_gamepad
+from ps3_controller import controller_ps3_main
+import os
+
+
 
 # TMs = []
 # def aggiungi_display(clk, dio):
@@ -392,5 +396,5 @@ if __name__ == '__main__':
     with open('../FE/src/assets/ip.ts', 'w') as f:
         f.write(template)
     print("🎮 Avvio controller PS3")
-    eventlet.spawn(controller_ps3)
+    eventlet.spawn(controller_ps3_main.controller_ps3)
     eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
