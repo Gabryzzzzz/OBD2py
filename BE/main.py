@@ -65,31 +65,31 @@ def send_data():
 
 # Funzione per configurare la connessione OBD
 def configure_obd():
-    global connection, eventlet_data
-    #print the config
+    global connection, eventlet_data, eventlet_obd
     print("🔧 Configurazione OBD:")
-    print(f"Show prints: {cfg.SHOW_PRINTS}")
-    # eventlet.sleep(5)
+
+    # A list of common serial ports to try
+    # For Linux, they are often /dev/ttyUSB0, /dev/ttyACM0, etc.
+    # For Windows, they are COM1, COM2, etc.
+    possible_ports = [f"/dev/ttyUSB{i}" for i in range(2)] + [f"COM{i}" for i in range(1, 2)]
+
     connection = None
-    if cfg.TRY_ENABLED:
-        for i in range(cfg.TRY_TIMES):
-            connection = obd.OBD(cfg.OBD_PORT)
-            if connection.is_connected():
-                print("✅ Connessione OBD riuscita!")
-                break
-            else:
-                #send a message to the client
-                # sio.emit('popup_channel', {
-                #     'type': 'warn',
-                #     'title': 'OBD Error',
-                #     'message': f"Errore di connessione all'OBD, tentativo {i+1}",
-                #     'timestamp': int(time.time() * 1000)
-                # })
-                send_error('OBD Error', f"Errore di connessione all'OBD, tentativo {i+1}")
-                print("❌ Errore di connessione all'OBD, tentativo", i+1)
-                eventlet.sleep(cfg.TRY_SLEEP)
-    else:
-        connection = obd.OBD(cfg.OBD_PORT, fast=True)
+
+    for port in possible_ports:
+        print(f"🔄 Tentativo di connessione sulla porta: {port}")
+        try:
+            connection = obd.OBD(port, fast=False, timeout=30)
+        except Exception as e:
+            print(f"⚠️  Errore durante l'inizializzazione di python-obd su {port}: {e}")
+            continue # Try the next port
+
+        if connection.is_connected():
+            print(f"✅ Connessione OBD riuscita sulla porta {port}!")
+            break # Exit the loop on successful connection
+        else:
+            print(f"❌ Connessione fallita sulla porta {port}")
+            connection.close() # Close the failed connection before trying the next
+            connection = None
 
     if connection.is_connected():
         print("✅ Connessione OBD riuscita!")
@@ -111,6 +111,7 @@ def configure_obd():
         send_error('OBD Error', 'Connessione obd non riuscita, attivo la modalita\' di simulazione')
 
     eventlet_data = eventlet.spawn(send_data)
+    eventlet_obd = None # Clear the spawner task as it has completed
 
 def get_ip():
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
