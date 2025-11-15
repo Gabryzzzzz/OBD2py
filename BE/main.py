@@ -153,9 +153,8 @@ def send_info(title, message):
 data_requested_led = "acc"
 setup_executed = False
 def setup_display():
-    global setup_executed
     if not setup_executed:
-        setup_executed = True
+        # time.sleep(1)
         led.setup_led_display()
         # eventlet.spawn(gyroscope.start_gyro)
         # eventlet.spawn(send_pos_info)
@@ -178,30 +177,58 @@ def setup_display():
             if data_requested_led == "temp":
                 # eventlet.spawn(led.TMs[1].temperature, int(temp))
                 pass
-            eventlet.sleep(0.3)
+            time.sleep(0.3)
 
-def dividi_numero(valore_float: float) -> tuple[str, str]:
-    """
-    Splits a float into a two-digit integer part and a two-digit decimal part.
-    Example: -1.234 -> ('-1', '23'), 5.6 -> ('05', '60')
-    """
-    try:
-        # Format the number to have leading zeros and a fixed number of decimal places
-        formatted_str = f"{valore_float:05.2f}" # e.g., -1.23 -> -1.23, 5.6 -> 05.60
-        
-        parte_intera = formatted_str[:3].replace('.', '0') # Takes sign and two digits
-        parte_decimale = formatted_str[3:]
-        return parte_intera, parte_decimale
-    except (ValueError, TypeError):
+
+
+
+
+
+def dividi_numero(valore_float):
+    # 1. Converti il float in una stringa
+    stringa_completa = str(valore_float)
+
+    # 2. Gestisci i numeri negativi
+    segno = ""
+    if stringa_completa.startswith('-'):
+        segno = "-"
+        # Rimuovi il segno per le operazioni successive
+        stringa_completa = stringa_completa[1:]
+
+    # 3. Trova la posizione del punto decimale
+    parti = stringa_completa.split('.')
+    if len(parti) > 1:
+
+        # 4. Estrai la parte intera (a sinistra del punto)
+        parte_intera_str = parti[0]
+
+        # 5. Estrai la parte decimale (a destra del punto)
+        parte_decimale_str = parti[1]
+
+        # 6. Formatta la parte intera
+        # Se la parte intera è lunga 1, aggiungi uno 0 davanti (es. 1 -> 01)
+        if len(parte_intera_str) < 2:
+            parte_intera_formattata = f"{segno}0{parte_intera_str}"
+        else:
+            parte_intera_formattata = f"{segno}{parte_intera_str}"
+
+        # 7. Formatta la parte decimale
+        # Assicurati che sia lunga 2, aggiungendo uno 0 se necessario
+        parte_decimale_formattata = parte_decimale_str[:2].ljust(2, '0')
+
+        # 8. Restituisci le due parti come tuple
+        return parte_intera_formattata, parte_decimale_formattata
+    else:
         return "00", "00"
 
 #Quando ricevi richiesta da FE manda una stringa di test in un canale di test
 @sio.on('test_led')
 def test_led(sid, data):
     send_success('TEST LED', 'Inizio test')
+    # os.system("python /home/gabryzzzzz/Documents/led.py")
+    # eventlet.spawn(setup_hardware)
     global data_requested_led
     data_requested_led = data
-    # Spawning setup_display is sufficient, no need to call it directly if it's already running
     eventlet.spawn(setup_display)
     time.sleep(2)
     send_success('TEST LED', 'Fine test')
@@ -295,6 +322,8 @@ def controller_ps3():
     button_states = {}
     send_success('Controller', 'Controller PS3 connesso e attivo.')
     while True:
+        # Use a small sleep to prevent the loop from consuming 100% CPU in its own thread.
+        eventlet.sleep(0.01)
         # Get all available events from the gamepad
         try:
             events = get_gamepad()
