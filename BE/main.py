@@ -315,7 +315,7 @@ def controller_ps3():
     button_states = {}
     print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
     while True:
-        time.sleep(0.2)
+        time.sleep(0.01)
 
         # Get all available events from the gamepad
         try:
