@@ -306,6 +306,7 @@ def stop_obd(sid):
 
 
 def controller_ps3():
+    global data_requested_led
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
     print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
