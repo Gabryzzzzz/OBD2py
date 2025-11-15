@@ -12,7 +12,7 @@ def leggi_dati(connection, sio, cfg, led):
     }
 
     #se non è connesso simulare i dati
-    if not connection.is_connected():
+    if not connection or not connection.is_connected():
         simula_dati(sio, cfg, led)
     else:
         #leggi e formatta i vari dati per avere interi
