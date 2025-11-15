@@ -354,8 +354,8 @@ def monitor_controller_log():
                             print(f"🎮 {message}")
                             send_success('Controller', message)
                             # Get current config, edit, and save
-                            with open('config.json', 'r') as f:
-                                current_config = json.load(f)
+                            with open('config.json', 'r') as f_config:
+                                current_config = json.load(f_config)
                             current_config['LED_CONFIG'] = data_requested_led
                             update_config_file(current_config)
                         else:
