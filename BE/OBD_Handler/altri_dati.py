@@ -14,7 +14,7 @@ def aggiorna_distanza(connection):
     delta_t = current_time - last_time  # secondi
     last_time = current_time
 
-    if not connection.is_connected():
+    if not connection or not connection.is_connected():
         speed = random.randint(0, 180)  # float
         # distanza = velocità (km/h) * tempo (h)
         distanza = speed * (delta_t / 3600.0)
