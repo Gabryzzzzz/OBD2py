@@ -19,8 +19,8 @@ def leggi_dati(connection, sio, cfg, led):
         dati = {}
         if cfg.LED_CONFIG == "motore":
             led.TMs[0].temperature(int(connection.query(obd.commands.COOLANT_TEMP)))
-            # led.TMs[1].temperature(int(connection.query(obd.commands.SPEED)))
-            # led.TMs[2].temperature(int(connection.query(obd.commands.THROTTLE_POS)))
+            led.TMs[1].temperature(int(connection.query(obd.commands.SPEED)))
+            led.TMs[2].temperature(int(connection.query(obd.commands.THROTTLE_POS)))
         for nome, comando in comandi.items():
             try:
                 risposta = connection.query(comando)
@@ -42,8 +42,10 @@ def simula_dati(sio, cfg, led):
         "pressione_map": random.randint(0, 100),
         "flusso_maf": random.randint(0, 100)
     }
-    if cfg.LED_CONFIG == "temp":
-        led.TMs[1].temperature(int(random.randint(0, 100)))
+    if cfg.LED_CONFIG == "motore":
+        led.TMs[0].temperature(int(random.randint(0, 100)))
+        led.TMs[1].temperature(int(dati["velocita"]))
+        led.TMs[2].temperature(int(dati["rpm"]))
     sio.emit('motore', dati)
     if cfg.SHOW_PRINTS:
         print(f"📤 Motore: {dati}")
