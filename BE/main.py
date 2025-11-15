@@ -377,12 +377,12 @@ def controller_ps3():
                             send_info('Controller', "X button pressed, cycling LED config")
                             pass
 
-                            if data_requested_led == "acc":
-                                data_requested_led = "gyr"
-                            elif data_requested_led == "gyr":
-                                data_requested_led = "temp"
-                            elif data_requested_led == "temp":
-                                data_requested_led = "acc"
+                            # if data_requested_led == "acc":
+                            #     data_requested_led = "gyr"
+                            # elif data_requested_led == "gyr":
+                            #     data_requested_led = "temp"
+                            # elif data_requested_led == "temp":
+                            #     data_requested_led = "acc"
                             send_success('LED Config', f'LED display now showing: {data_requested_led}')
 
                         else:
