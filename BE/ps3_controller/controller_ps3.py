@@ -7,7 +7,13 @@ STICK_DEADZONE = 4000
 LOG_FILE = "controller_log.txt"
 
 def main():
-
+    # Clear the log file to prevent executing old commands
+    try:
+        with open(LOG_FILE, 'w') as f:
+            pass # Opening in 'w' mode and closing truncates the file
+        print("📝 Log del controller pulito.")
+    except FileNotFoundError:
+        pass # File doesn't exist yet, which is fine
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
 

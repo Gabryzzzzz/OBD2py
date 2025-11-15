@@ -392,13 +392,7 @@ if __name__ == '__main__':
         subprocess.run(["kill", pid])
         time.sleep(0.5) # Give a moment for the process to terminate
 
-    # Clear the log file to prevent executing old commands
-    try:
-        with open(CONTROLLER_LOG_PATH, 'w') as f:
-            pass # Opening in 'w' mode and closing truncates the file
-        print("📝 Log del controller pulito.")
-    except FileNotFoundError:
-        pass # File doesn't exist yet, which is fine
+    
 
     # Launch the new controller process
     send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3...")
