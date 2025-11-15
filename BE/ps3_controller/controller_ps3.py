@@ -2,6 +2,7 @@ import inputs
 import time
 import sys
 
+from importlib import reload
 # Analog stick deadzone to prevent drift
 STICK_DEADZONE = 4000 
 LOG_FILE = "controller_log.txt"
@@ -15,7 +16,7 @@ def main():
 
     try:
         # Open the log file in append mode ('a') to add to it without deleting existing content
-        with open(LOG_FILE, "a") as log_file:
+        with open(LOG_FILE, "a", encoding="utf-8") as log_file:
             log_file.write(f"--- New Session Started at {time.ctime()} ---\n")
             log_file.flush()
             
@@ -29,6 +30,7 @@ def main():
                         is_connected = True
                         print("✅ Gamepad connected successfully.")
                     except Exception:
+                        reload(inputs) # Fully reload the module to ensure a clean state
                         print("⚠️ Gamepad not found. Retrying in 5 seconds...")
                         time.sleep(5)
                 
@@ -36,6 +38,11 @@ def main():
                 while is_connected:
                     try:
                         events = inputs.get_gamepad()
+                        # If get_gamepad() returns an empty list after a disconnect,
+                        # it means the controller is gone. We must raise an error
+                        # to trigger the reconnection logic.
+                        if not events:
+                            raise ConnectionError("Gamepad disconnected (no events).")
                         for event in events:
                             # Update the stick state when an 'Absolute' event is received
                             if event.ev_type == 'Absolute':
@@ -67,15 +74,15 @@ def main():
                                         print(message.strip())
                                         log_file.write(message)
                                         log_file.flush()
-                                button_states[event.code] = event.state
-                    except Exception:
+                                button_states[event.code] = event.state                    
+                    except (ConnectionError, OSError, IndexError, inputs.UnpluggedError):
                         # Controller disconnected
                         message = "🎮 Gamepad disconnected. Attempting to reconnect...\n"
                         print(message.strip())
                         log_file.write(message)
                         log_file.flush()
                         time.sleep(1) # Give the OS a moment to clean up stale device files
-                        inputs.devices = inputs.DeviceManager() # Re-initialize to rescan for devices
+                        reload(inputs) # Fully reload the module to ensure a clean state
                         is_connected = False # This will break the event loop and go back to the connection loop
     except KeyboardInterrupt:
         print("\nExiting program.")
