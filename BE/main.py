@@ -12,6 +12,7 @@ import os
 import threading
 import subprocess
 import json
+import unicodedata
 
 CONTROLLER_LOG_PATH = "ps3_controller/controller_log.txt"
 
@@ -124,9 +125,26 @@ def get_ip():
         s.close()
     return IP
 
+def sanitize_for_display(text):
+    """Removes characters not suitable for the 7-segment display."""
+    # Normalize to remove accents (e.g., 'à' -> 'a')
+    nfkd_form = unicodedata.normalize('NFKD', text)
+    text_without_accents = "".join([c for c in nfkd_form if not unicodedata.combining(c)])
+    # Filter for allowed characters (alphanumeric, space, hyphen)
+    return "".join(c for c in text_without_accents.upper() if c.isalnum() or c in " -")
+
 #Funzione per popup di errore per non ripeterla nel codice
 def send_error(title, message):
-    led.TMs[0].scroll("ERROR " + message)
+    sanitized_message = sanitize_for_display("ERROR " + message)
+    
+    # Adjust scroll speed based on message length.
+    # A lower delay means faster scrolling.
+    # The base delay is 250ms. We reduce it for longer messages.
+    # This assumes the scroll() method accepts a 'delay' keyword argument in milliseconds.
+    delay = max(100, 250 - len(sanitized_message) * 5) # Ensure delay is at least 100ms
+
+    led.TMs[0].scroll(sanitized_message, delay=delay)
+
     sio.emit('popup_channel', {
         'type': 'error',
         'title': title,
