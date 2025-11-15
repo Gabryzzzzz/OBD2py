@@ -126,7 +126,7 @@ def get_ip():
 
 #Funzione per popup di errore per non ripeterla nel codice
 def send_error(title, message):
-    # TMs[0].scroll, "ERROR: " + message
+    led.TMs[0].scroll("ERROR " + message)
     sio.emit('popup_channel', {
         'type': 'error',
         'title': title,
