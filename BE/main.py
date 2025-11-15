@@ -12,6 +12,8 @@ import os
 import threading
 import subprocess
 
+CONTROLLER_LOG_PATH = "controller_log.txt"
+
 # TMs = []
 # def aggiungi_display(clk, dio):
 #     TMs.append(tm1637.TM1637(clk=clk, dio=dio))
@@ -316,6 +318,33 @@ def stop_obd(sid):
 
     send_success('OBD Stop', 'OBD fermato con successo!')
 
+def monitor_controller_log():
+    """
+    Monitors the controller log file for new commands, sends them via WebSocket,
+    and removes the processed line from the file.
+    """
+    print("🎮 Avvio monitoraggio log controller...")
+    while True:
+        try:
+            # Open the file for reading and writing
+            with open(CONTROLLER_LOG_PATH, "r+") as f:
+                lines = f.readlines()
+                if lines:
+                    # Get the first command and remove it from the list
+                    command = lines.pop(0).strip()
+                    
+                    # Ignore session start messages
+                    if command and not command.startswith("---"):
+                        print(f"🎮 Comando ricevuto dal controller: {command}")
+                        sio.emit('controller_event', {'button': command})
+
+                    # Go back to the start of the file and overwrite it with the remaining lines
+                    f.seek(0)
+                    f.truncate()
+                    f.writelines(lines)
+        except FileNotFoundError:
+            pass # File might not exist yet, just wait
+        eventlet.sleep(0.1) # Check the file every 100ms
 
 # Avvia il server
 if __name__ == '__main__':
@@ -337,6 +366,9 @@ if __name__ == '__main__':
     # Launch the new controller process
     send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3...")
     subprocess.Popen(["python3", "ps3_controller/controller_ps3.py"])
+    
+    # Start the background task to monitor the controller's log file
+    eventlet.spawn(monitor_controller_log)
 
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")

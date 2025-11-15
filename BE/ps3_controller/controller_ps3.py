@@ -64,9 +64,16 @@ def main():
                         prev_state = button_states.get(event.code, 0)
                         # Check if the button is being pressed now and was released before
                         if event.state == 1 and prev_state == 0:
-                            message = f"{time.ctime()} - Button {event.code} was pressed\n"
-                            print(message.strip())
-                            log_file.write(message)
+                            if event.code == 'BTN_START':
+                                print("Start button pressed. Exiting.")
+                                log_file.write("EXIT_BY_START_BUTTON\n")
+                                log_file.flush()
+                                sys.exit(0) # Exit the program cleanly
+                            else:
+                                message = f"{event.code}\n"
+                                print(message.strip())
+                                log_file.write(message)
+                                log_file.flush()
                         button_states[event.code] = event.state
     except KeyboardInterrupt:
         print("\nExiting program.")
