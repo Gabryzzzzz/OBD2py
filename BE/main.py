@@ -366,8 +366,9 @@ def controller_ps3():
 # Avvia il server
 if __name__ == '__main__':
     global eventlet_obd
-    eventlet.spawn(gyroscope.start_gyro)
+    print("🎮 Avvio controller PS3")
     eventlet.spawn(controller_ps3)
+    eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
     eventlet.spawn(setup_display)
 
