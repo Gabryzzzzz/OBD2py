@@ -1,5 +1,6 @@
 from inputs import get_gamepad
 import time
+import sys
 
 # Analog stick deadzone to prevent drift
 STICK_DEADZONE = 4000 
@@ -16,15 +17,17 @@ def main():
     try:
         # Open the log file in append mode ('a') to add to it without deleting existing content
         with open(LOG_FILE, "a") as log_file:
-            log_file.write(f"\n--- New Session Started at {time.ctime()} ---\n")
+            log_file.write(f"--- New Session Started at {time.ctime()} ---\n")
+            log_file.flush()
             while True:
                 # Get all available events from the gamepad
                 try:
                     events = get_gamepad()
                 except Exception:
-                    message = f"{time.ctime()} - Gamepad not found. Please connect a gamepad.\n"
+                    message = "Gamepad not found. Please connect a gamepad.\n"
                     print(message.strip())
                     log_file.write(message)
+                    log_file.flush()
                     break
 
                 for event in events:
@@ -41,16 +44,18 @@ def main():
                         # D-PAD: Check for transition from 0 (released) to not 0 (pressed)
                         if event.code in ('ABS_HAT0X', 'ABS_HAT0Y'):
                             if event.state != 0 and prev_state == 0:
-                                message = f"{time.ctime()} - D-Pad {event.code} pressed with value: {event.state}\n"
+                                message = f"{event.code}\n"
                                 print(message.strip())
                                 log_file.write(message)
+                                log_file.flush()
 
                         # TRIGGERS: Check for transition from 0 to a pressed state
                         if event.code in ('ABS_Z', 'ABS_RZ'): # Corresponds to LT/L2 and RT/R2
                             if event.state > 0 and prev_state == 0:
-                                message = f"{time.ctime()} - Trigger {event.code} was pressed\n"
+                                message = f"{event.code}\n"
                                 print(message.strip())
                                 log_file.write(message)
+                                log_file.flush()
 
                         button_states[event.code] = event.state
                     # Handle button presses

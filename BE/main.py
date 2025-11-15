@@ -324,17 +324,19 @@ if __name__ == '__main__':
     eventlet.spawn(gyroscope.start_gyro)
     time.sleep(2)
     eventlet.spawn(setup_display)
-
-    # Check if the controller process is already running to avoid duplicates
-    check_process = subprocess.run(["pgrep", "-f", "ps3_controller.py"], capture_output=True)
+    
+    # Check if the controller process is already running to kill it before restarting
+    check_process = subprocess.run(["pgrep", "-f", "ps3_controller.py"], capture_output=True, text=True)
     if check_process.returncode == 0:
-        pid = check_process.stdout.decode().strip()
-        send_info("Avvio Servizi", f"🎮 Controller PS3 già in esecuzione (PID: {pid}).")
-        print(f"🎮 Controller PS3 già in esecuzione (PID: {pid}).")
-    else:
-        send_info("Avvio Servizi", "🎮 Avvio controller PS3...")
-        # Launch the PS3 controller script as a non-blocking background process
-        subprocess.Popen(["python3", "ps3_controller/controller_ps3.py"])
+        pid = check_process.stdout.strip()
+        send_info("Avvio Servizi", f"🎮 Trovato controller PS3 in esecuzione (PID: {pid}). Lo chiudo.")
+        print(f"🎮 Trovato controller PS3 in esecuzione (PID: {pid}). Lo chiudo.")
+        subprocess.run(["kill", pid])
+        time.sleep(0.5) # Give a moment for the process to terminate
+
+    # Launch the new controller process
+    send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3...")
+    subprocess.Popen(["python3", "ps3_controller/controller_ps3.py"])
 
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
