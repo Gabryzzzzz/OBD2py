@@ -46,21 +46,7 @@ def main():
                         for event in events:
                             # Update the stick state when an 'Absolute' event is received
                             if event.ev_type == 'Absolute':
-                                # Get previous state for D-pad
-                                prev_state = button_states.get(event.code, 0)
-
-                                # D-PAD UP/DOWN for interval control
-                                if event.code == 'ABS_HAT0Y':
-                                    if event.state == -1 and prev_state == 0: # D-pad UP pressed
-                                        message = "INTERVAL_UP\n"
-                                        print("D-pad UP pressed. Logging INTERVAL_UP.")
-                                        log_file.write(message)
-                                        log_file.flush()
-                                    elif event.state == 1 and prev_state == 0: # D-pad DOWN pressed
-                                        message = "INTERVAL_DOWN\n"
-                                        print("D-pad DOWN pressed. Logging INTERVAL_DOWN.")
-                                        log_file.write(message)
-                                        log_file.flush()
+                                # This block can be used for analog stick handling in the future
                                 button_states[event.code] = event.state
                             # Handle button presses
                             elif event.ev_type == 'Key':
@@ -81,6 +67,16 @@ def main():
                                     elif event.code == 'BTN_WEST': # Square button
                                         message = "RETRY_OBD_CONNECTION\n"
                                         print("West button pressed. Logging RETRY_OBD_CONNECTION.")
+                                        log_file.write(message)
+                                        log_file.flush()
+                                    elif event.code == 'BTN_D_UP':
+                                        message = "INTERVAL_UP\n"
+                                        print("D-pad UP pressed. Logging INTERVAL_UP.")
+                                        log_file.write(message)
+                                        log_file.flush()
+                                    elif event.code == 'BTN_D_DOWN':
+                                        message = "INTERVAL_DOWN\n"
+                                        print("D-pad DOWN pressed. Logging INTERVAL_DOWN.")
                                         log_file.write(message)
                                         log_file.flush()
                                     else:
