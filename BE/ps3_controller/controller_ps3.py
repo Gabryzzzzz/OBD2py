@@ -74,7 +74,7 @@ def main():
                         print(message.strip())
                         log_file.write(message)
                         log_file.flush()
-                        inputs.devices.rescan() # Force the library to look for new devices
+                        inputs.devices = inputs.DeviceManager() # Re-initialize the device manager to rescan for devices
                         is_connected = False # This will break the event loop and go back to the connection loop
                         time.sleep(1) # Small delay before starting reconnection attempts
     except KeyboardInterrupt:
