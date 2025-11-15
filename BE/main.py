@@ -68,10 +68,15 @@ def configure_obd():
     global connection, eventlet_data, eventlet_obd
     print("🔧 Configurazione OBD:")
 
-    # A list of common serial ports to try
-    # For Linux, they are often /dev/ttyUSB0, /dev/ttyACM0, etc.
-    # For Windows, they are COM1, COM2, etc.
-    possible_ports = [f"/dev/ttyUSB{i}" for i in range(2)] + [f"COM{i}" for i in range(1, 2)]
+    # Determine possible ports based on the operating system
+    possible_ports = []
+    if os.name == 'posix': # For Linux, macOS, etc.
+        print("🐧 Rilevato sistema operativo POSIX (Linux/macOS). Scansione porte /dev/tty...")
+        possible_ports.extend([f"/dev/ttyUSB{i}" for i in range(4)])
+        possible_ports.extend([f"/dev/ttyACM{i}" for i in range(4)])
+    elif os.name == 'nt': # For Windows
+        print("💻 Rilevato sistema operativo Windows. Scansione porte COM...")
+        possible_ports.extend([f"COM{i}" for i in range(1, 9)])
 
     connection = None
 
