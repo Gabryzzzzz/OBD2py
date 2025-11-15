@@ -306,7 +306,7 @@ def stop_obd(sid):
 
 
 def controller_ps3():
-    global data_requested_led
+    # global data_requested_led
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
     print("Controller active. Press a button or move the stick. (Ctrl+C to exit)")
@@ -353,13 +353,13 @@ def controller_ps3():
                     else:
                         if event.code == 'BTN_SOUTH':
                             print("X button pressed, cycling LED config")
-                            if data_requested_led == "acc":
-                                data_requested_led = "gyr"
-                            elif data_requested_led == "gyr":
-                                data_requested_led = "temp"
-                            elif data_requested_led == "temp":
-                                data_requested_led = "acc"
-                            send_success('LED Config', f'LED display now showing: {data_requested_led}')
+                            # if data_requested_led == "acc":
+                            #     data_requested_led = "gyr"
+                            # elif data_requested_led == "gyr":
+                            #     data_requested_led = "temp"
+                            # elif data_requested_led == "temp":
+                            #     data_requested_led = "acc"
+                            # send_success('LED Config', f'LED display now showing: {data_requested_led}')
 
                         print(f"Button {event.code} was pressed")
                 button_states[event.code] = event.state
