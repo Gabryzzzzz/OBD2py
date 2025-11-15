@@ -361,7 +361,7 @@ def monitor_controller_log():
                         elif command == 'RETRY_OBD_CONNECTION':
                             print("🎮 Comando ricevuto: Riprova connessione OBD.")
                             send_info("Controller", "Riprova connessione OBD...")
-                            led.TMs[0].scroll_all("OBD-RETRY") # Display message on LEDs
+                            led.TMs[0].scroll("OBD-RETRY") # Display message on LEDs
                             restart_obd(None) # Call the existing restart function
                         else:
                             print(f"🎮 Comando ricevuto dal controller: {command}")
