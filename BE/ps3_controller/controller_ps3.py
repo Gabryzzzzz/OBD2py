@@ -1,7 +1,8 @@
 from inputs import get_gamepad
 
 # Analog stick deadzone to prevent drift
-STICK_DEADZONE = 4000
+STICK_DEADZONE = 4000 
+
 
 def main():
 
