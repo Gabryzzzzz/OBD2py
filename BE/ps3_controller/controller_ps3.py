@@ -1,8 +1,10 @@
 from inputs import get_gamepad
-from time import sleep
 
-def controller_ps3():
-    sleep(5)
+# Analog stick deadzone to prevent drift
+STICK_DEADZONE = 4000 
+
+def main():
+
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
 
@@ -54,3 +56,6 @@ def controller_ps3():
                     button_states[event.code] = event.state
     except KeyboardInterrupt:
         print("\nExiting program.")
+
+if __name__ == "__main__":
+    main()
