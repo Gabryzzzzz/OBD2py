@@ -350,7 +350,7 @@ def controller_ps3():
                     elif event.code == 'BTN_SELECT':
                         print("Select button pressed")
                     else:
-                        if event.code == 'BTN_X':
+                        if event.code == 'BTN_SOUTH':
                             print("X button pressed, cycling LED config")
                             if data_requested_led == "acc":
                                 data_requested_led = "gyr"
