@@ -67,28 +67,20 @@ def send_data():
 def configure_obd():
     global connection, eventlet_data, eventlet_obd
     print("🔧 Configurazione OBD:")
-    
-    # Start with the port from the config file as the first priority
-    configured_port = cfg.OBD_PORT
-    ports_to_try = [configured_port]
-    print(f"ℹ️  Prima provo la porta dalla configurazione: {configured_port}")
-    
-    # Determine other possible ports to try if the configured one fails
-    other_possible_ports = []
-    if os.name == 'posix': # For Linux, macOS, etc.
-        print("🐧 Rilevato sistema operativo POSIX (Linux/macOS). Genero porte /dev/tty di fallback...")
-        other_possible_ports.extend([f"/dev/ttyUSB{i}" for i in range(4)])
-        other_possible_ports.extend([f"/dev/ttyACM{i}" for i in range(4)])
-    elif os.name == 'nt': # For Windows
-        print("💻 Rilevato sistema operativo Windows. Genero porte COM di fallback...")
-        other_possible_ports.extend([f"COM{i}" for i in range(1, 9)])
 
-    # Add the other ports to the list, avoiding duplicates
-    ports_to_try.extend([p for p in other_possible_ports if p not in ports_to_try])
+    # Determine possible ports based on the operating system
+    possible_ports = []
+    if os.name == 'posix': # For Linux, macOS, etc.
+        print("🐧 Rilevato sistema operativo POSIX (Linux/macOS). Scansione porte /dev/tty...")
+        possible_ports.extend([f"/dev/ttyUSB{i}" for i in range(4)])
+        possible_ports.extend([f"/dev/ttyACM{i}" for i in range(4)])
+    elif os.name == 'nt': # For Windows
+        print("💻 Rilevato sistema operativo Windows. Scansione porte COM...")
+        possible_ports.extend([f"COM{i}" for i in range(1, 9)])
 
     connection = None
 
-    for port in ports_to_try:
+    for port in possible_ports:
         print(f"🔄 Tentativo di connessione sulla porta: {port}")
         try:
             connection = obd.OBD(port, fast=False, timeout=30)
@@ -203,7 +195,6 @@ def update_config_file(config_data):
 data_requested_led = "acc"
 setup_executed = False
 def setup_display():
-    
     if not setup_executed:
         # time.sleep(1)
         led.setup_led_display()
@@ -434,7 +425,11 @@ def monitor_controller_log():
 # Avvia il server
 if __name__ == '__main__':
     # global eventlet_obd # This is not needed here as it's already global
-
+    data_requested_led = cfg.LED_CONFIG
+    
+    eventlet.spawn(gyroscope.start_gyro)
+    time.sleep(2)
+    eventlet.spawn(setup_display)
     
     # Check if the controller process is already running to kill it before restarting
     check_process = subprocess.run(["pgrep", "-f", "ps3_controller.py"], capture_output=True, text=True)
@@ -457,12 +452,8 @@ if __name__ == '__main__':
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
-    
-    # Load the LED display mode from config *before* starting the display
-    data_requested_led = cfg.LED_CONFIG
-    eventlet.spawn(gyroscope.start_gyro)
-    time.sleep(2)
-    eventlet.spawn(setup_display)
+
+
     # eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
