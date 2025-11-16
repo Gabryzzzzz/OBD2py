@@ -22,21 +22,18 @@ def main():
             
             # Main loop to handle connection and events
             while True: 
-                # --- Connection Loop ---
-                is_connected = False
-                while not is_connected:
-                    try:
-                        inputs.get_gamepad() # This will raise an exception if no gamepad is found
-                        is_connected = True
-                        print("✅ Gamepad connected successfully.")
-                    except Exception:
-                        reload(inputs) # Fully reload the module to ensure a clean state
-                        print("⚠️ Gamepad not found. Retrying in 5 seconds...")
-                        time.sleep(5)
-                
-                # --- Event Processing Loop ---
-                while is_connected:
-                    try:
+                try:
+                    # --- Connection Attempt ---
+                    # This will raise an exception if no gamepad is found,
+                    # which is caught below to handle the "not found" case.
+                    if not inputs.devices.gamepads:
+                         # Force a check that raises an error if no gamepads are present
+                        inputs.get_gamepad()
+                    
+                    print("✅ Gamepad connected. Monitoring for events...")
+
+                    # --- Event Processing Loop ---
+                    while True:
                         events = inputs.get_gamepad()
                         # If get_gamepad() returns an empty list after a disconnect,
                         # it means the controller is gone. We must raise an error
@@ -85,15 +82,22 @@ def main():
                                         log_file.write(message)
                                         log_file.flush()
                                 button_states[event.code] = event.state                    
-                    except (ConnectionError, OSError, IndexError, inputs.UnpluggedError):
-                        # Controller disconnected
-                        message = "🎮 Gamepad disconnected. Attempting to reconnect...\n"
-                        print(message.strip())
+                except (ConnectionError, OSError, IndexError, inputs.UnpluggedError, inputs.UnknownEventCode):
+                    # This block now catches initial connection failures and subsequent disconnections.
+                    message = "🎮 Gamepad not found or disconnected. Retrying in 5 seconds...\n"
+                    print(message.strip())
+                    
+                    # Only write to log if the file is still open
+                    if not log_file.closed:
                         log_file.write(message)
                         log_file.flush()
-                        time.sleep(1) # Give the OS a moment to clean up stale device files
+
+                    time.sleep(5) # Wait before retrying
+                    try:
                         reload(inputs) # Fully reload the module to ensure a clean state
-                        is_connected = False # This will break the event loop and go back to the connection loop
+                    except FileNotFoundError:
+                        # This can happen in a race condition if device files are gone but not yet fully deregistered.
+                        print("⚠️ Race condition during device scan. Retrying...")
     except KeyboardInterrupt:
         print("\nExiting program.")
 
