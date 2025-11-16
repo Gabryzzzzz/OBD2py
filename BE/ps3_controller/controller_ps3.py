@@ -2,6 +2,7 @@ import inputs
 import time
 import sys
 
+import subprocess
 from importlib import reload
 # Analog stick deadzone to prevent drift
 STICK_DEADZONE = 4000 
@@ -65,6 +66,15 @@ def main():
                                         message = "RETRY_OBD_CONNECTION\n"
                                         print("West button pressed. Logging RETRY_OBD_CONNECTION.")
                                         log_file.write(message)
+                                        log_file.flush()
+                                    elif event.code == 'BTN_TR': # R1 button
+                                        message = "RESTART_SERVICE\n"
+                                        print("R1 button pressed. Restarting obd2Pi service...")
+                                        try:
+                                            # Execute the system command directly
+                                            subprocess.run(["sudo", "systemctl", "restart", "obd2Pi.service"], check=True)
+                                        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                                            print(f"❌ Failed to restart service: {e}")
                                         log_file.flush()
                                     elif event.code == 'BTN_DPAD_UP':
                                         message = "INTERVAL_UP\n"
