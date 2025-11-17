@@ -3,6 +3,7 @@ import adafruit_mpu6050
 import busio
 import time
 
+import math
 import json
 import os
 # Inizializza l'interfaccia I2C usando i pin del Raspberry Pi
@@ -15,6 +16,11 @@ mpu = adafruit_mpu6050.MPU6050(i2c)
 accelerazione = (0, 0, 0)
 giroscopio = (0, 0, 0)
 temperatura = 0
+
+# --- Variables for Complementary Filter ---
+filtered_pitch = 0.0
+filtered_roll = 0.0
+last_update_time = 0.0
 
 # --- Load Calibration Data ---
 CALIBRATION_FILE = "calibration_data.json"
@@ -35,12 +41,24 @@ except (KeyError, json.JSONDecodeError):
 
 
 def get_info():
-    return accelerazione, giroscopio, temperatura
+    """Returns the filtered orientation and raw sensor data."""
+    # Return the filtered pitch and roll, converted to degrees for easier use in the frontend.
+    return math.degrees(filtered_pitch), math.degrees(filtered_roll), temperatura
 
 def start_gyro():
-    global accelerazione, giroscopio, temperatura
+    global accelerazione, giroscopio, temperatura, filtered_pitch, filtered_roll, last_update_time
+    
+    # Filter coefficient (alpha). A higher value trusts the accelerometer more.
+    # A lower value trusts the gyroscope more. 0.02 is a good starting point.
+    ALPHA = 0.02
+
+    last_update_time = time.monotonic()
+
     while True:
         try:
+            current_time = time.monotonic()
+            dt = current_time - last_update_time
+            last_update_time = current_time
             # Read raw data
             raw_acc = mpu.acceleration
             raw_gyro = mpu.gyro
@@ -57,7 +75,26 @@ def start_gyro():
                 raw_gyro[2] + gyro_offsets["z"],
             )
             temperatura = mpu.temperature
-            time.sleep(0.1)
+
+            # --- Complementary Filter Calculations ---
+
+            # 1. Calculate pitch and roll from accelerometer data
+            # These angles are stable but noisy.
+            acc_pitch = math.atan2(accelerazione[0], math.sqrt(accelerazione[1]**2 + accelerazione[2]**2))
+            acc_roll = math.atan2(accelerazione[1], accelerazione[2])
+
+            # 2. Integrate gyroscope data to get change in angle
+            # This is responsive but drifts over time.
+            # We use the previous filtered angle as the base.
+            gyro_pitch = filtered_pitch + giroscopio[1] * dt
+            gyro_roll = filtered_roll - giroscopio[0] * dt # Invert gyro X for correct roll
+
+            # 3. Combine the two using the complementary filter
+            # new_angle = (1 - alpha) * (gyro_angle) + alpha * (accelerometer_angle)
+            filtered_pitch = (1 - ALPHA) * gyro_pitch + ALPHA * acc_pitch
+            filtered_roll = (1 - ALPHA) * gyro_roll + ALPHA * acc_roll
+
+            time.sleep(0.01) # Run the filter at a high frequency (e.g., 100Hz)
         except OSError:
             # If there's a read error, just skip this iteration
             time.sleep(0.5)
