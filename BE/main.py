@@ -452,6 +452,7 @@ if __name__ == '__main__':
     
     # Check if the controller process is already running to kill it before restarting
     check_process = subprocess.run(["pgrep", "-f", "ps3_controller.py"], capture_output=True, text=True)
+    check_process = subprocess.run(["pgrep", "-f", "controller_evdev.py"], capture_output=True, text=True)
     if check_process.returncode == 0:
         pid = check_process.stdout.strip()
         send_info("Avvio Servizi", f"🎮 Trovato controller PS3 in esecuzione (PID: {pid}). Lo chiudo.")
@@ -462,6 +463,8 @@ if __name__ == '__main__':
     # Launch the new controller process
     send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3...")
     subprocess.Popen(["python3", "controller_ps3.py"], cwd="ps3_controller")
+    send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3 (EVDEV)...")
+    subprocess.Popen(["python3", "controller_evdev.py"], cwd="ps3_controller")
     
     # Start the background task to monitor the controller's log file
     eventlet.spawn(monitor_controller_log)
