@@ -1,11 +1,14 @@
 import time
 import sys
 import subprocess
+import json
+import os
 import evdev
 from evdev import ecodes
 
 LOG_FILE = "controller_log.txt"
 TARGET_DEVICE_NAME = "PLAYSTATION"
+BUTTON_MAP_FILE = "button_map.json"
 
 def find_controller():
     """
@@ -23,10 +26,32 @@ def find_controller():
         print("⚠️ Controller not found. Retrying in 5 seconds...")
         time.sleep(5)
 
+def load_button_map():
+    """Loads the button map and creates a reverse map for quick lookups."""
+    map_path = os.path.join(os.path.dirname(__file__), BUTTON_MAP_FILE)
+    try:
+        with open(map_path, "r") as f:
+            action_to_code = json.load(f)
+            # Create a reverse map for efficient lookups {code: action}
+            code_to_action = {v: k for k, v in action_to_code.items()}
+            print("✅ Button map loaded successfully.")
+            return code_to_action
+    except FileNotFoundError:
+        print(f"❌ ERROR: '{BUTTON_MAP_FILE}' not found.")
+        print("   Please run 'map_controller.py' first to generate it.")
+        sys.exit(1)
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"❌ ERROR: Invalid button map file. {e}")
+        print("   Please run 'map_controller.py' again.")
+        sys.exit(1)
+
 def main():
     """
     Main function to find the controller and process its events.
     """
+    # Load the button mapping at the start
+    code_to_action_map = load_button_map()
+
     try:
         with open(LOG_FILE, "a", encoding="utf-8") as log_file:
             log_file.write(f"--- New EVDEV Session Started at {time.ctime()} ---\n")
@@ -51,40 +76,32 @@ def main():
 
                         # We only care about key presses (event.value == 1)
                         if event.type == ecodes.EV_KEY and event.value == 1:
-                            message = None
-                            
-                            if event.code == ecodes.BTN_START:
-                                print("Start button pressed. Exiting.")
-                                log_file.write("EXIT_BY_START_BUTTON\n")
-                                log_file.flush()
+                            action = code_to_action_map.get(event.code)
+
+                            if not action:
+                                continue # Ignore unmapped buttons
+
+                            print(f"Button press detected: '{action}' (code: {event.code})")
+
+                            # Handle special actions that don't just log a message
+                            if action == "EXIT_SCRIPT":
+                                print("Exit button pressed. Exiting.")
                                 sys.exit(0)
-                            elif event.code == ecodes.BTN_SOUTH: # 'X' button
-                                message = "CYCLE_LED_MODE"
-                                print("X button pressed. Logging CYCLE_LED_MODE.")
-                            elif event.code == ecodes.BTN_WEST: # Square button
-                                message = "RETRY_OBD_CONNECTION"
-                                print("West button pressed. Logging RETRY_OBD_CONNECTION.")
-                            elif event.code == ecodes.BTN_TR: # R1 button
+                            elif action == "RESTART_SERVICE":
                                 print("R1 button pressed. Restarting obd2Pi service...")
                                 try:
                                     subprocess.run(["sudo", "systemctl", "restart", "obd2Pi.service"], check=True)
                                 except (subprocess.CalledProcessError, FileNotFoundError) as e:
                                     print(f"❌ Failed to restart service: {e}")
-                            elif event.code == ecodes.BTN_TR2: # R2 button
+                            elif action == "STOP_SERVICE":
                                 print("R2 button pressed. Stopping obd2Pi service...")
                                 try:
                                     subprocess.run(["sudo", "systemctl", "stop", "obd2Pi.service"], check=True)
                                 except (subprocess.CalledProcessError, FileNotFoundError) as e:
                                     print(f"❌ Failed to stop service: {e}")
-                            elif event.code == ecodes.BTN_DPAD_UP:
-                                message = "INTERVAL_UP"
-                                print("D-pad UP pressed. Logging INTERVAL_UP.")
-                            elif event.code == ecodes.BTN_DPAD_DOWN:
-                                message = "INTERVAL_DOWN"
-                                print("D-pad DOWN pressed. Logging INTERVAL_DOWN.")
-                            
-                            if message:
-                                log_file.write(f"{message}\n")
+                            else:
+                                # For all other actions, write the action name to the log file
+                                log_file.write(f"{action}\n")
                                 log_file.flush()
 
                 except (OSError, evdev.EvdevError) as e:
