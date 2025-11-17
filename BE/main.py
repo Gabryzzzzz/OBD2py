@@ -43,9 +43,8 @@ informazioni_richieste = {
 def send_gyroscope_data():
     while True:
         eventlet.sleep(0.01)
-        pitch, roll, temp = gyroscope.get_info()
-        # Emit the filtered orientation data in degrees
-        sio.emit('orientation', { 'pitch': pitch, 'roll': roll, 'temp': temp })
+        acc, gyr, temp = gyroscope.get_info()
+        sio.emit('posizione', [ acc, gyr, temp ])
             
 
 # Funzione per inviare dati periodicamente

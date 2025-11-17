@@ -28,17 +28,17 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
   private camera!: THREE.PerspectiveCamera;
   private cube!: THREE.Mesh;
 
-  // Store the filtered orientation from the backend
-  private orientation = { pitch: 0, roll: 0 };
+  accellerazione: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
+  giroscopio: { x: string; y: string; z: string } = { x: '', y: '', z: '' };
+  dati_movimento: dati_movimento = new dati_movimento();
 
   private animationId: any;
 
   constructor(public socket_service: SocketRequestsService) {
-    // Subscribe to the new 'orientation' event
-    this.socket_service.get_position().subscribe((data) => {
-      // Directly store the stable pitch and roll values
-      this.orientation.pitch = data.pitch;
-      this.orientation.roll = data.roll;
+    socket_service.get_position().subscribe((x) => {
+      console.log('posizione', x);
+      this.dati_movimento.set_data(x);
+      console.log('dati convertiti', this.dati_movimento);
     });
   }
 
@@ -60,21 +60,43 @@ export class CruscottoModelComponent implements AfterViewInit, OnDestroy {
     this.cube = new THREE.Mesh(geometry, material);
     this.scene.add(this.cube);
 
+    // Inizia ciclo dati simulati
+    // setInterval(() => {
+    //   this.generateMockIMUData();
+    // }, 300);
+
     // Inizia animazione
     this.animate();
   }
 
+  private rotation = { x: 0, y: 0, z: 0 };
+
+  private gyroscopeThreshold = 0.1; // soglia di sensibilità (tune this)
+  private lastTimestamp = performance.now();
+
   private animate = () => {
+    const now = performance.now();
+    const deltaTime = (now - this.lastTimestamp) / 1000; // in secondi
+    this.lastTimestamp = now;
+
     this.animationId = requestAnimationFrame(this.animate);
 
-    // Convert degrees from backend to radians for Three.js
-    const pitchInRadians = THREE.MathUtils.degToRad(this.orientation.pitch);
-    const rollInRadians = THREE.MathUtils.degToRad(this.orientation.roll);
+    // Applica soglia (deadzone) al giroscopio
+    const gyroX = Math.abs(this.dati_movimento.giroscopio.x) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.x + this.gyroscopeThreshold : 0;
+    const gyroY = Math.abs(this.dati_movimento.giroscopio.y) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.y + this.gyroscopeThreshold : 0;
+    const gyroZ = Math.abs(this.dati_movimento.giroscopio.z) > this.gyroscopeThreshold ? this.dati_movimento.giroscopio.z + this.gyroscopeThreshold : 0;
 
-    // Directly set the cube's rotation using the stable data from the backend.
-    // The axes might need to be swapped or inverted depending on sensor orientation.
-    // A common mapping is: pitch -> rotation.x, roll -> rotation.y
-    this.cube.rotation.set(pitchInRadians, rollInRadians, 0);
+    // Integra la rotazione nel tempo
+    this.rotation.x += -(gyroX) * deltaTime;
+    this.rotation.y += -(gyroY) * deltaTime;
+    this.rotation.z += (gyroZ) * deltaTime;
+
+    this.cube.rotation.set(this.rotation.x, this.rotation.y, this.rotation.z);
+
+    // Applica traslazioni basate sull'accelerazione (scalo per visibilità)
+    // this.cube.position.x = this.dati_movimento.accelerometro.x * 0.5;
+    // this.cube.position.y = this.dati_movimento.accelerometro.y * 0.1;
+    // this.cube.position.z = this.dati_movimento.accelerometro.z * 0.2;
 
     this.renderer.render(this.scene, this.camera);
   }
