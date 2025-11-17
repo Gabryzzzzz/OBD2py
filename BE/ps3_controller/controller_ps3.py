@@ -1,34 +1,11 @@
 import inputs
 import time
 import sys
-import os
-import subprocess
+
+from importlib import reload
 # Analog stick deadzone to prevent drift
 STICK_DEADZONE = 4000 
 LOG_FILE = "controller_log.txt"
-
-def find_gamepad_device():
-    """
-    Waits for a gamepad device to appear in /dev/input/ and returns its path.
-    This is a more robust way to handle connection delays on Linux.
-    """
-    print("⏳ Waiting for a gamepad device to be created by the OS...")
-    while True:
-        try:
-            # Force a clean re-scan by creating a new DeviceManager instance.
-            devices = inputs.DeviceManager()
-            gamepads = devices.gamepads
-
-            if gamepads:
-                print(f"✅ Found {len(gamepads)} gamepad(s):")
-                for i, gamepad in enumerate(gamepads):
-                    print(f"  [{i}]: {gamepad}")
-            # This will raise an IndexError if no gamepads are found by the library
-            # which is a good way to check if a device is ready.
-            return gamepads[0]
-        except (IndexError, FileNotFoundError):
-            # If not found, wait and let the loop try again.
-            time.sleep(2)
 
 def main():
     # To store the state of the buttons (0=released, 1=pressed)
@@ -43,75 +20,70 @@ def main():
             log_file.write(f"--- New Session Started at {time.ctime()} ---\n")
             log_file.flush()
             
-            while True: # Main loop for the script's lifetime
-                gamepad = None
-                try:
-                    gamepad = find_gamepad_device()
-                    print(f"✅ Gamepad connected: {gamepad.name}. Monitoring for events...")
-                except PermissionError:
-                    print("❌ Permission Denied. Cannot read controller device file.")
-                    print("   Run 'sudo usermod -a -G input $USER' and reboot your Pi.")
-                    time.sleep(10) # Wait longer before retrying
-
+            # Main loop to handle connection and events
+            while True: 
+                # --- Connection Loop ---
+                is_connected = False
+                while not is_connected:
+                    try:
+                        inputs.get_gamepad() # This will raise an exception if no gamepad is found
+                        is_connected = True
+                        print("✅ Gamepad connected successfully.")
+                    except Exception:
+                        reload(inputs) # Fully reload the module to ensure a clean state
+                        print("⚠️ Gamepad not found. Retrying in 5 seconds...")
+                        time.sleep(5)
+                
                 # --- Event Processing Loop ---
-                try:
-                    while True:
-                        events = gamepad.read()
+                while is_connected:
+                    try:
+                        events = inputs.get_gamepad()
+                        # If get_gamepad() returns an empty list after a disconnect,
+                        # it means the controller is gone. We must raise an error
+                        # to trigger the reconnection logic.
+                        if not events:
+                            raise ConnectionError("Gamepad disconnected (no events).")
                         for event in events:
+                            # Update the stick state when an 'Absolute' event is received
                             if event.ev_type == 'Absolute':
+                                # ... (omitting unchanged absolute event handling for brevity) ...
                                 button_states[event.code] = event.state
+                            # Handle button presses
                             elif event.ev_type == 'Key':
+                                # Get the previous state of the button, defaulting to 0 (released)
                                 prev_state = button_states.get(event.code, 0)
+                                # Check if the button is being pressed now and was released before
                                 if event.state == 1 and prev_state == 0:
                                     if event.code == 'BTN_START':
                                         print("Start button pressed. Exiting.")
                                         log_file.write("EXIT_BY_START_BUTTON\n")
                                         log_file.flush()
-                                        sys.exit(0)
+                                        sys.exit(0) # Exit the program cleanly
                                     elif event.code == 'BTN_SOUTH': # 'X' button
                                         message = "CYCLE_LED_MODE\n"
                                         print("X button pressed. Logging CYCLE_LED_MODE.")
                                         log_file.write(message)
+                                        log_file.flush()
                                     elif event.code == 'BTN_WEST': # Square button
                                         message = "RETRY_OBD_CONNECTION\n"
                                         print("West button pressed. Logging RETRY_OBD_CONNECTION.")
                                         log_file.write(message)
-                                    elif event.code == 'BTN_TR': # R1 button
-                                        print("R1 button pressed. Restarting obd2Pi service...")
-                                        try:
-                                            subprocess.run(["sudo", "systemctl", "restart", "obd2Pi.service"], check=True)
-                                        except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                                            print(f"❌ Failed to restart service: {e}")
-                                    elif event.code == 'BTN_TR2': # R2 button
-                                        print("R2 button pressed. Stopping obd2Pi service...")
-                                        try:
-                                            subprocess.run(["sudo", "systemctl", "stop", "obd2Pi.service"], check=True)
-                                        except (subprocess.CalledProcessError, FileNotFoundError) as e:
-                                            print(f"❌ Failed to stop service: {e}")
-                                    elif event.code == 'BTN_DPAD_UP':
-                                        message = "INTERVAL_UP\n"
-                                        print("D-pad UP pressed. Logging INTERVAL_UP.")
-                                        log_file.write(message)
-                                    elif event.code == 'BTN_DPAD_DOWN':
-                                        message = "INTERVAL_DOWN\n"
-                                        print("D-pad DOWN pressed. Logging INTERVAL_DOWN.")
-                                        log_file.write(message)
+                                        log_file.flush()
                                     else:
                                         message = f"{event.code}\n"
                                         print(message.strip())
                                         log_file.write(message)
-                                    
-                                    log_file.flush()
-                                button_states[event.code] = event.state
-                except (OSError, inputs.UnpluggedError) as e:
-                    # This block catches disconnections.
-                    message = f"🎮 Gamepad disconnected ({e}). Returning to connection loop...\n"
-                    print(message.strip())
-                    if not log_file.closed:
+                                        log_file.flush()
+                                button_states[event.code] = event.state                    
+                    except (ConnectionError, OSError, IndexError, inputs.UnpluggedError):
+                        # Controller disconnected
+                        message = "🎮 Gamepad disconnected. Attempting to reconnect...\n"
+                        print(message.strip())
                         log_file.write(message)
                         log_file.flush()
-                    # The outer 'while True' loop will now take over and start searching for a gamepad again.
-                    
+                        time.sleep(1) # Give the OS a moment to clean up stale device files
+                        reload(inputs) # Fully reload the module to ensure a clean state
+                        is_connected = False # This will break the event loop and go back to the connection loop
     except KeyboardInterrupt:
         print("\nExiting program.")
 
