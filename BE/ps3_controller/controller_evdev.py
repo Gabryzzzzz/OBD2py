@@ -43,7 +43,11 @@ def main():
                     for event in device.read_loop():
                         # For development purposes, print all categorized events
                         # This will show analog stick movements, triggers, etc.
-                        print(evdev.categorize(event))
+                        try:
+                            print(evdev.categorize(event))
+                        except KeyError:
+                            # This happens when a button code is not recognized by the library
+                            print(f"Unknown event: type={event.type}, code={event.code}, value={event.value}")
 
                         # We only care about key presses (event.value == 1)
                         if event.type == ecodes.EV_KEY and event.value == 1:
@@ -83,7 +87,7 @@ def main():
                                 log_file.write(f"{message}\n")
                                 log_file.flush()
 
-                except (OSError, evdev.errors.EvdevError) as e:
+                except (OSError, evdev.EvdevError) as e:
                     # This typically means the controller was disconnected.
                     message = f"🎮 Gamepad disconnected ({e}). Returning to scanning loop...\n"
                     print(message.strip())
