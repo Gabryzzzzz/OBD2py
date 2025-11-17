@@ -431,28 +431,27 @@ if __name__ == '__main__':
     time.sleep(2)
     eventlet.spawn(setup_display)
 
-    # --- Start sixad driver for PS3 controller if not running ---
-    # print("🎮 Checking for sixad driver...")
-    # check_sixad = subprocess.run(["pgrep", "sixad"], capture_output=True, text=True)
-    # if check_sixad.returncode != 0:
-    #     print("⚠️ sixad driver not running. Attempting to start it...")
-    #     send_info("Avvio Servizi", "🎮 Avvio sixad driver...")
-    #     try:
-    #         # Using Popen to run in the background and not block
-    #         subprocess.Popen(["sudo", "sixad", "--start"])
-    #         print("✅ sixad driver started. Please connect your controller by pressing the PS button.")
-    #         send_success("Avvio Servizi", "Driver sixad avviato. Connetti il controller.")
-    #         time.sleep(2) # Give it a moment to initialize
-    #     except (subprocess.CalledProcessError, FileNotFoundError) as e:
-    #         print(f"❌ Failed to start sixad driver: {e}")
-    #         send_error("Driver Error", "Impossibile avviare sixad.")
-    # else:
-    #     pid = check_sixad.stdout.strip()
-    #     print(f"✅ sixad driver is already running (PID: {pid}).")
+    #--- Start sixad driver for PS3 controller if not running ---
+    print("🎮 Checking for sixad driver...")
+    check_sixad = subprocess.run(["pgrep", "sixad"], capture_output=True, text=True)
+    if check_sixad.returncode != 0:
+        print("⚠️ sixad driver not running. Attempting to start it...")
+        send_info("Avvio Servizi", "🎮 Avvio sixad driver...")
+        try:
+            # Using Popen to run in the background and not block
+            subprocess.Popen(["sudo", "sixad", "--start"])
+            print("✅ sixad driver started. Please connect your controller by pressing the PS button.")
+            send_success("Avvio Servizi", "Driver sixad avviato. Connetti il controller.")
+            time.sleep(2) # Give it a moment to initialize
+        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+            print(f"❌ Failed to start sixad driver: {e}")
+            send_error("Driver Error", "Impossibile avviare sixad.")
+    else:
+        pid = check_sixad.stdout.strip()
+        print(f"✅ sixad driver is already running (PID: {pid}).")
     
     # Check if the controller process is already running to kill it before restarting
     check_process = subprocess.run(["pgrep", "-f", "ps3_controller.py"], capture_output=True, text=True)
-    check_process = subprocess.run(["pgrep", "-f", "controller_evdev.py"], capture_output=True, text=True)
     if check_process.returncode == 0:
         pid = check_process.stdout.strip()
         send_info("Avvio Servizi", f"🎮 Trovato controller PS3 in esecuzione (PID: {pid}). Lo chiudo.")
@@ -463,8 +462,6 @@ if __name__ == '__main__':
     # Launch the new controller process
     send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3...")
     subprocess.Popen(["python3", "controller_ps3.py"], cwd="ps3_controller")
-    send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3 (EVDEV)...")
-    subprocess.Popen(["python3", "controller_evdev.py"], cwd="ps3_controller")
     
     # Start the background task to monitor the controller's log file
     eventlet.spawn(monitor_controller_log)
