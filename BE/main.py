@@ -460,8 +460,8 @@ if __name__ == '__main__':
         time.sleep(0.5) # Give a moment for the process to terminate
 
     # Launch the new controller process
-    send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3...")
-    subprocess.Popen(["python3", "controller_evdev.py"], cwd="controller_evdev")
+    send_info("Avvio Servizi", "🎮 Avvio nuovo controller PS3 (EVDEV)...")
+    subprocess.Popen(["python3", "controller_evdev.py"], cwd="ps3_controller")
     
     # Start the background task to monitor the controller's log file
     eventlet.spawn(monitor_controller_log)
