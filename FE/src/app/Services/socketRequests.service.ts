@@ -22,7 +22,7 @@ export class SocketRequestsService {
 
   //test send on channel test
   get_position() {
-    return this.socket.fromEvent<any, any>('orientation');
+    return this.socket.fromEvent<string, any>('posizione');
   }
 
   //send local ip request

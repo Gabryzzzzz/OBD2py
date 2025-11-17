@@ -201,7 +201,9 @@ def setup_display():
         # eventlet.spawn(gyroscope.start_gyro)
         # eventlet.spawn(send_pos_info)
         while True:
-            acc, gyr, temp = gyroscope.get_info()
+            # Get the raw data directly from the gyroscope module's global variables
+            acc = gyroscope.accelerazione
+            gyr = gyroscope.giroscopio
             if data_requested_led == "acc":
                 x1, x2 = dividi_numero(acc[0])
                 y1, y2 = dividi_numero(acc[1])
