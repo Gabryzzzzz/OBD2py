@@ -1,11 +1,34 @@
 import inputs
 import time
 import sys
+import os
 import subprocess
-from importlib import reload
 # Analog stick deadzone to prevent drift
 STICK_DEADZONE = 4000 
 LOG_FILE = "controller_log.txt"
+
+def find_gamepad_device():
+    """
+    Waits for a gamepad device to appear in /dev/input/ and returns its path.
+    This is a more robust way to handle connection delays on Linux.
+    """
+    print("⏳ Waiting for a gamepad device to be created by the OS...")
+    while True:
+        try:
+            # Force a device scan by accessing the manager
+            devices = inputs.devices
+            gamepads = devices.gamepads
+
+            if gamepads:
+                print(f"✅ Found {len(gamepads)} gamepad(s):")
+                for i, gamepad in enumerate(gamepads):
+                    print(f"  [{i}]: {gamepad}")
+            # This will raise an IndexError if no gamepads are found by the library
+            # which is a good way to check if a device is ready.
+            return gamepads[0]
+        except (IndexError, FileNotFoundError):
+            # If not found, wait and let the loop try again.
+            time.sleep(2)
 
 def main():
     # To store the state of the buttons (0=released, 1=pressed)
@@ -22,23 +45,13 @@ def main():
             
             while True: # Main loop for the script's lifetime
                 gamepad = None
-                while not gamepad:
-                    try:
-                        # Create a new device manager to force a re-scan
-                        devices = inputs.DeviceManager()
-                        # Get the first available gamepad
-                        gamepad = devices.gamepads[0]
-                        print("✅ Gamepad connected. Monitoring for events...")
-                    except (IndexError, FileNotFoundError):
-                        # IndexError: No gamepads were found.
-                        # FileNotFoundError: A race condition where a device file disappears during scanning.
-                        print("⚠️ Gamepad not found. Retrying in 5 seconds...")
-                        time.sleep(5)
-                    except PermissionError:
-                        message = "❌ Permission Denied. Cannot read controller device file."
-                        print(message)
-                        print("   Run 'sudo usermod -a -G input $USER' and reboot your Pi.")
-                        time.sleep(10) # Wait longer before retrying
+                try:
+                    gamepad = find_gamepad_device()
+                    print(f"✅ Gamepad connected: {gamepad.name}. Monitoring for events...")
+                except PermissionError:
+                    print("❌ Permission Denied. Cannot read controller device file.")
+                    print("   Run 'sudo usermod -a -G input $USER' and reboot your Pi.")
+                    time.sleep(10) # Wait longer before retrying
 
                 # --- Event Processing Loop ---
                 try:
