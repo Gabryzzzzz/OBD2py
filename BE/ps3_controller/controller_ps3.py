@@ -9,6 +9,10 @@ STICK_DEADZONE = 4000
 LOG_FILE = "controller_log.txt"
 
 def main():
+    # --- Initial Delay ---
+    # Give the OS and sixad driver a moment to create the device file after connection.
+    time.sleep(3)
+
     # To store the state of the buttons (0=released, 1=pressed)
     button_states = {}
 
@@ -99,7 +103,14 @@ def main():
                                         print(message.strip())
                                         log_file.write(message)
                                         log_file.flush()
-                                button_states[event.code] = event.state                    
+                                button_states[event.code] = event.state
+                except PermissionError:
+                    # This is a specific, common error on Linux.
+                    message = "❌ Permission Denied. Cannot read controller device file."
+                    print(message)
+                    print("   Run 'sudo usermod -a -G input $USER' and reboot your Pi.")
+                    time.sleep(10) # Wait longer before retrying
+                    continue # Go to the next iteration of the main loop
                 except (ConnectionError, OSError, IndexError, inputs.UnpluggedError, inputs.UnknownEventCode):
                     # This block now catches initial connection failures and subsequent disconnections.
                     message = "🎮 Gamepad not found or disconnected. Retrying in 5 seconds...\n"
