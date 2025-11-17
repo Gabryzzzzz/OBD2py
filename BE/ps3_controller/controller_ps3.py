@@ -76,6 +76,14 @@ def main():
                                         except (subprocess.CalledProcessError, FileNotFoundError) as e:
                                             print(f"❌ Failed to restart service: {e}")
                                         log_file.flush()
+                                    elif event.code == 'BTN_TR2': # R2 button
+                                        print("R2 button pressed. Stopping obd2Pi service...")
+                                        try:
+                                            # Execute the system command directly to stop the service
+                                            subprocess.run(["sudo", "systemctl", "stop", "obd2Pi.service"], check=True)
+                                        except (subprocess.CalledProcessError, FileNotFoundError) as e:
+                                            print(f"❌ Failed to stop service: {e}")
+                                        log_file.flush()
                                     elif event.code == 'BTN_DPAD_UP':
                                         message = "INTERVAL_UP\n"
                                         print("D-pad UP pressed. Logging INTERVAL_UP.")
