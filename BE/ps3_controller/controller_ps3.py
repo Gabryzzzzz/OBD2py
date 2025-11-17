@@ -29,7 +29,9 @@ def main():
                         # Get the first available gamepad
                         gamepad = devices.gamepads[0]
                         print("✅ Gamepad connected. Monitoring for events...")
-                    except IndexError:
+                    except (IndexError, FileNotFoundError):
+                        # IndexError: No gamepads were found.
+                        # FileNotFoundError: A race condition where a device file disappears during scanning.
                         print("⚠️ Gamepad not found. Retrying in 5 seconds...")
                         time.sleep(5)
                     except PermissionError:
