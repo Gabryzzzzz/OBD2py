@@ -15,8 +15,8 @@ def find_gamepad_device():
     print("⏳ Waiting for a gamepad device to be created by the OS...")
     while True:
         try:
-            # Force a device scan by accessing the manager
-            devices = inputs.devices
+            # Force a clean re-scan by creating a new DeviceManager instance.
+            devices = inputs.DeviceManager()
             gamepads = devices.gamepads
 
             if gamepads:
