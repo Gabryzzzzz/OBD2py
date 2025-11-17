@@ -41,6 +41,10 @@ def main():
                     print("🎮 Monitoring for events...")
                     
                     for event in device.read_loop():
+                        # For development purposes, print all categorized events
+                        # This will show analog stick movements, triggers, etc.
+                        print(evdev.categorize(event))
+
                         # We only care about key presses (event.value == 1)
                         if event.type == ecodes.EV_KEY and event.value == 1:
                             message = None
