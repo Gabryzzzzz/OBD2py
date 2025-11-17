@@ -13,10 +13,9 @@ def get_player_proxy(bus):
         # The path for the media player interface
         mpris_path = '/org/mpris/MediaPlayer2'
 
-        # Get all objects managed by BlueZ
-        managed_objects = bus.get(bus_name).GetManagedObjects()
-
-        # Find the first device that exposes the media player interface
+        # Get the object manager for the BlueZ service
+        manager = bus.get(bus_name, "/")
+        managed_objects = manager["org.freedesktop.DBus.ObjectManager"].GetManagedObjects()
         for path, interfaces in managed_objects.items():
             if 'org.mpris.MediaPlayer2.Player' in interfaces:
                 print(f"✅ Found media player at: {path}")
