@@ -68,11 +68,11 @@ def main():
                     for event in device.read_loop():
                         # For development purposes, print all categorized events
                         # This will show analog stick movements, triggers, etc.
-                        try:
-                            print(evdev.categorize(event))
-                        except KeyError:
-                            # This happens when a button code is not recognized by the library
-                            print(f"Unknown event: type={event.type}, code={event.code}, value={event.value}")
+                        # try:
+                        #     print(evdev.categorize(event))
+                        # except KeyError:
+                        #     # This happens when a button code is not recognized by the library
+                        #     print(f"Unknown event: type={event.type}, code={event.code}, value={event.value}")
 
                         # We only care about key presses (event.value == 1)
                         if event.type == ecodes.EV_KEY and event.value == 1:
