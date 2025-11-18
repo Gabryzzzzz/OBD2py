@@ -7,7 +7,6 @@ from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
 from gyroscope import gyroscope
 from led import led
-from inputs import get_gamepad
 import os
 import threading
 import subprocess

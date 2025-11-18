@@ -18,9 +18,9 @@ def leggi_dati(connection, sio, cfg, led):
         #leggi e formatta i vari dati per avere interi
         dati = {}
         if cfg.LED_CONFIG == "motore":
-            led.TMs[0].temperature(int(connection.query(obd.commands.COOLANT_TEMP)))
-            led.TMs[1].temperature(int(connection.query(obd.commands.SPEED)))
-            led.TMs[2].temperature(int(connection.query(obd.commands.THROTTLE_POS)))
+            led.TMs[0].temperature(int(connection.query(obd.commands.COOLANT_TEMP).value.magnitude))
+            led.TMs[1].temperature(int(connection.query(obd.commands.SPEED).value.magnitude))
+            led.TMs[2].temperature(int(connection.query(obd.commands.THROTTLE_POS).value.magnitude))
         for nome, comando in comandi.items():
             try:
                 risposta = connection.query(comando)
