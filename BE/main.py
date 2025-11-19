@@ -83,6 +83,8 @@ def configure_obd():
         print(f"🔄 Tentativo di connessione sulla porta: {port}")
         try:
             connection = obd.OBD(port, fast=False, timeout=30)
+            if connection.is_connected():
+                break
         except Exception as e:
             print(f"⚠️  Errore durante l'inizializzazione di python-obd su {port}: {e}")
             continue # Try the next port
