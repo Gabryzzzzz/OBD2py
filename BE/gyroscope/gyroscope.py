@@ -48,6 +48,8 @@ def get_info():
 def start_gyro():
     global accelerazione, giroscopio, temperatura, filtered_pitch, filtered_roll, last_update_time
     
+
+    print("🚀 Avvio del giroscopio...")
     # Filter coefficient (alpha). A higher value trusts the accelerometer more.
     # A lower value trusts the gyroscope more. 0.02 is a good starting point.
     ALPHA = 0.02

@@ -196,6 +196,7 @@ def update_config_file(config_data):
 data_requested_led = "acc"
 setup_executed = False
 def setup_display():
+    print("🚀 Avvio setup LED Display...")
     if not setup_executed:
         # time.sleep(1)
         led.setup_led_display()
@@ -223,11 +224,6 @@ def setup_display():
                 # eventlet.spawn(led.TMs[1].temperature, int(temp))
                 pass
             time.sleep(0.1)
-
-
-
-
-
 
 def dividi_numero(valore_float):
     # 1. Converti il float in una stringa
@@ -425,15 +421,7 @@ def monitor_controller_log():
             pass # File might not exist yet, just wait
         eventlet.sleep(0.1) # Check the file every 100ms
 
-# Avvia il server
-if __name__ == '__main__':
-    # global eventlet_obd # This is not needed here as it's already global
-    data_requested_led = cfg.LED_CONFIG
-    
-    eventlet.spawn(gyroscope.start_gyro)
-    time.sleep(2)
-    eventlet.spawn(setup_display)
-
+def setup_controller():
     #--- Start sixad driver for PS3 controller if not running ---
     print("🎮 Checking for sixad driver...")
     check_sixad = subprocess.run(["pgrep", "sixad"], capture_output=True, text=True)
@@ -469,14 +457,23 @@ if __name__ == '__main__':
     # Start the background task to monitor the controller's log file
     eventlet.spawn(monitor_controller_log)
 
+
+# Avvia il server
+if __name__ == '__main__':
+    # global eventlet_obd # This is not needed here as it's already global
+    data_requested_led = cfg.LED_CONFIG
+
+    eventlet.spawn(setup_controller)
+    eventlet.spawn(gyroscope.start_gyro)
+    time.sleep(2)
+    eventlet.spawn(setup_display)
+
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
 
-
-    # eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
     print("📤 IP locale:", ip)
