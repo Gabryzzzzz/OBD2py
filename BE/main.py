@@ -5,8 +5,9 @@ import socketio
 import socket
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-from gyroscope import gyroscope
-from led import led
+# from gyroscope import gyroscope
+from Database.database_handler import DatabaseHandler
+# from led import led
 import os
 import threading
 import subprocess
@@ -39,6 +40,8 @@ informazioni_richieste = {
     "altri_dati": False
 }
 
+db_handler = DatabaseHandler()
+
 def send_gyroscope_data():
     while True:
         eventlet.sleep(0.01)
@@ -48,10 +51,14 @@ def send_gyroscope_data():
 
 # Funzione per inviare dati periodicamente
 def send_data():
-    eventlet.spawn(send_gyroscope_data)
+    if cfg.IS_RASPBERRY_PI:
+        eventlet.spawn(send_gyroscope_data)
     while True:
         if informazioni_richieste['motore']:
-            motore_prestazioni.leggi_dati(connection, sio, cfg, led)
+            if cfg.IS_RASPBERRY_PI:
+                motore_prestazioni.leggi_dati(connection, sio, cfg, led, db_handler)
+            else:
+                motore_prestazioni.leggi_dati(connection, sio, cfg, None, db_handler)
             # acc, gyr, temp = gyroscope.get_info()
             # sio.emit('posizione', [ acc, gyr, temp ])
         if informazioni_richieste['altri_dati']:
@@ -69,15 +76,19 @@ def configure_obd():
 
     # Determine possible ports based on the operating system
     possible_ports = []
+    connection = None
     if os.name == 'posix': # For Linux, macOS, etc.
         print("🐧 Rilevato sistema operativo POSIX (Linux/macOS). Scansione porte /dev/tty...")
         possible_ports.extend([f"/dev/ttyUSB{i}" for i in range(4)])
         possible_ports.extend([f"/dev/ttyACM{i}" for i in range(4)])
     elif os.name == 'nt': # For Windows
-        print("💻 Rilevato sistema operativo Windows. Scansione porte COM...")
-        possible_ports.extend([f"COM{i}" for i in range(1, 9)])
+        eventlet_data = eventlet.spawn(send_data)
+        eventlet_obd = None # Clear the spawner task as it has completed
+        return
+        # print("💻 Rilevato sistema operativo Windows. Scansione porte COM...")
+        # possible_ports.extend([f"COM{i}" for i in range(1, 9)])
 
-    connection = None
+    
 
     for port in possible_ports:
         print(f"🔄 Tentativo di connessione sulla porta: {port}")
@@ -463,10 +474,11 @@ if __name__ == '__main__':
     # global eventlet_obd # This is not needed here as it's already global
     data_requested_led = cfg.LED_CONFIG
 
-    eventlet.spawn(setup_controller)
-    eventlet.spawn(gyroscope.start_gyro)
-    time.sleep(2)
-    eventlet.spawn(setup_display)
+    if cfg.IS_RASPBERRY_PI:
+        eventlet.spawn(setup_controller)
+        eventlet.spawn(gyroscope.start_gyro)
+        time.sleep(2)
+        eventlet.spawn(setup_display)
 
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
@@ -484,4 +496,7 @@ if __name__ == '__main__':
     with open('../FE/src/assets/ip.ts', 'w') as f:
         f.write(template)
 
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
+    try:
+        eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
+    finally:
+        db_handler.close()
