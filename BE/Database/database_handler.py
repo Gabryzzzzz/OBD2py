@@ -131,6 +131,40 @@ class DatabaseHandler:
         except sqlite3.Error as e:
             print(f"❌ Errore durante l'eliminazione dei dati simulati: {e}")
 
+    def get_data_by_category_and_range(self, category_name, start_date, end_date):
+        """
+        Retrieves data for a specific category within a given date range.
+        Dates should be in 'YYYY-MM-DD HH:MM:SS' format.
+        """
+        if not self.conn:
+            print("⚠️ Impossibile recuperare dati: nessuna connessione al database.")
+            return []
+
+        try:
+            cursor = self.conn.cursor()
+            # The query joins OBDData with Categories to filter by name,
+            # and filters the timestamp between the start and end dates.
+            query = """
+                SELECT
+                    d.Timestamp,
+                    d.Value
+                FROM
+                    OBDData d
+                JOIN
+                    Categories c ON d.CategoryID = c.CategoryID
+                WHERE
+                    c.Name = ? AND
+                    d.Timestamp BETWEEN ? AND ?
+                ORDER BY
+                    d.Timestamp ASC
+            """
+            cursor.execute(query, (category_name, start_date, end_date))
+            # Convert rows to a list of dictionaries for easier handling
+            return [dict(row) for row in cursor.fetchall()]
+        except sqlite3.Error as e:
+            print(f"❌ Errore durante il recupero dei dati per intervallo: {e}")
+            return []
+
 # Example usage:
 if __name__ == '__main__':
     import json

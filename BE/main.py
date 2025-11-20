@@ -5,8 +5,8 @@ import socketio
 import socket
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-from gyroscope import gyroscope
 from Database.database_handler import DatabaseHandler
+from gyroscope import gyroscope
 from led import led
 import os
 import threading
@@ -336,6 +336,30 @@ def stop_obd(sid):
         print("❌ Thread invio dati terminato.")
 
     send_success('OBD Stop', 'OBD fermato con successo!')
+
+@sio.on('get_data_by_range')
+def get_data_by_range(sid, data):
+    """
+    Handles a request from the client to get historical data for a category within a date range.
+    Expected data format: {'category': 'motore_prestazioni', 'startDate': 'YYYY-MM-DD HH:MM:SS', 'endDate': 'YYYY-MM-DD HH:MM:SS'}
+    """
+    # print(f"📊 Richiesta dati storici ricevuta: {data}")
+    try:
+        category = data['category']
+        start_date = data['startDate']
+        end_date = data['endDate']
+
+        results = db_handler.get_data_by_category_and_range(category, start_date, end_date)
+
+        # The 'Value' column is a JSON string, so we parse it before sending it back.
+        for row in results:
+            row['Value'] = json.loads(row['Value'])
+
+        print(f"📤 Invio di {len(results)} record per la categoria '{category}'.")
+        sio.emit('data_range_result', results, to=sid)
+    except (KeyError, TypeError) as e:
+        print(f"❌ Errore nella richiesta dati storici: formato dati non valido. {e}")
+        sio.emit('popup_channel', {'type': 'error', 'title': 'Errore Richiesta', 'message': 'Formato dati non valido.'}, to=sid)
 
 def monitor_controller_log():
     """

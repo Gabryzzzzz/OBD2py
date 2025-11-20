@@ -41,8 +41,9 @@
     </div>
   </div>
   <div class="card_cruscotto flex flex-col-reverse align-bottom justify-baseline gap-5 p-5 take_all_space">
-    <div class="flex flex-row gap-2 justify-between" *ngIf="configuration.unit_flag_benzina" (click)="handle_unit_benzina()">
-      <div class="flex flex-row gap-2" >
+    <div class="flex flex-row gap-2 justify-between" *ngIf="configuration.unit_flag_benzina"
+      (click)="handle_unit_benzina()">
+      <div class="flex flex-row gap-2">
         <span class="pi pi-globe" style="font-size: 3rem"></span>
         <p class="text-5xl font-bold">6.8</p>
         <p class="text-5xl font-bold"></p>
@@ -51,8 +52,9 @@
       </div>
       <p class="text-5xl font-bold">L/100km</p>
     </div>
-    <div class="flex flex-row gap-2 justify-between" *ngIf="!configuration.unit_flag_benzina" (click)="handle_unit_benzina()">
-      <div class="flex flex-row gap-2" >
+    <div class="flex flex-row gap-2 justify-between" *ngIf="!configuration.unit_flag_benzina"
+      (click)="handle_unit_benzina()">
+      <div class="flex flex-row gap-2">
         <span class="pi pi-globe" style="font-size: 3rem"></span>
         <p class="text-5xl font-bold">15.4</p>
         <p class="text-5xl font-bold"></p>
@@ -70,7 +72,16 @@
   </div>
   <div class="card_cruscotto grid gap-1">
     <!-- <p-chart type="line" [data]="chart_data" [options]="chart_options" class="h-full w-full" /> -->
-     <app-cruscotto-model></app-cruscotto-model>
+    <!-- <app-cruscotto-model></app-cruscotto-model> -->
+    <!-- Chart for Speed and Throttle -->
+    <apx-chart [series]="speedThrottleChartOptions.series" [chart]="speedThrottleChartOptions.chart"
+      [xaxis]="speedThrottleChartOptions.xaxis" [dataLabels]="speedThrottleChartOptions['dataLabels']"
+      [stroke]="speedThrottleChartOptions['stroke']" [grid]="speedThrottleChartOptions['grid']"></apx-chart>
+
+    <!-- Chart for RPM -->
+    <apx-chart [series]="rpmChartOptions.series" [chart]="rpmChartOptions.chart" [xaxis]="rpmChartOptions['xaxis']"
+      [dataLabels]="rpmChartOptions['dataLabels']" [stroke]="rpmChartOptions['stroke']"
+      [fill]="rpmChartOptions['fill']"></apx-chart>
   </div>
 
   <p-dialog header="Setup valori accelleratore" class="absolute" [modal]="true" [(visible)]="setup_throttle_visible"
@@ -105,8 +116,8 @@
   </p-dialog>
 </div>
 
-<p-button class="absolute top-24 pc:top-12 left-70 pc:left-40 scale-400 pc:scale-250" icon="pi pi-wrench" (click)="visible_test_page = !visible_test_page"
-  [rounded]="true" severity="secondary" />
+<p-button class="absolute top-24 pc:top-12 left-70 pc:left-40 scale-400 pc:scale-250" icon="pi pi-wrench"
+  (click)="visible_test_page = !visible_test_page" [rounded]="true" severity="secondary" />
 <p-drawer header="Test" [(visible)]="visible_test_page" position="right" styleClass="!w-3/4 pc:!w-1/3">
   <div class="card_cruscotto flex flex-col gap-5 p-5 take_all_space overflow-y-scroll">
     <div class="flex items-center">
