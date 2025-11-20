@@ -5,9 +5,9 @@ import socketio
 import socket
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
-# from gyroscope import gyroscope
+from gyroscope import gyroscope
 from Database.database_handler import DatabaseHandler
-# from led import led
+from led import led
 import os
 import threading
 import subprocess
@@ -16,12 +16,6 @@ import unicodedata
 
 CONTROLLER_LOG_PATH = "ps3_controller/controller_log.txt"
 
-# TMs = []
-# def aggiungi_display(clk, dio):
-#     TMs.append(tm1637.TM1637(clk=clk, dio=dio))
-
-# aggiungi_display(25, 8)
-# aggiungi_display(7, 1)
 # Abilita WebSocket asincroni
 eventlet.monkey_patch()
 
@@ -37,7 +31,7 @@ eventlet_data = None
 
 informazioni_richieste = {
     "motore": True,
-    "altri_dati": False
+    "altri_dati": True
 }
 
 db_handler = DatabaseHandler()
@@ -62,7 +56,7 @@ def send_data():
             # acc, gyr, temp = gyroscope.get_info()
             # sio.emit('posizione', [ acc, gyr, temp ])
         if informazioni_richieste['altri_dati']:
-            altri_dati.leggi_dati(connection, sio)
+            altri_dati.leggi_dati(connection, sio, db_handler)
         # temperatura_sensori.leggi_dati(connection, sio)
         # diagnostica.leggi_dati(connection, sio)
         # emissioni.leggi_dati(connection, sio)
@@ -85,15 +79,11 @@ def configure_obd():
         eventlet_data = eventlet.spawn(send_data)
         eventlet_obd = None # Clear the spawner task as it has completed
         return
-        # print("💻 Rilevato sistema operativo Windows. Scansione porte COM...")
-        # possible_ports.extend([f"COM{i}" for i in range(1, 9)])
-
-    
 
     for port in possible_ports:
         print(f"🔄 Tentativo di connessione sulla porta: {port}")
         try:
-            connection = obd.OBD(port, fast=False, timeout=30)
+            connection = obd.OBD(port, fast=True, timeout=10)
             if connection.is_connected():
                 break
         except Exception as e:
@@ -110,21 +100,9 @@ def configure_obd():
 
     if connection: # Check if the connection object exists, not if it's connected (it will be if it exists)
         print("✅ Connessione OBD riuscita!")
-        # sio.emit('popup_channel', {
-        #     'type': 'success',
-        #     'title': 'OBD Success',
-        #     'message': f"Connessione obd riuscita!",
-        #     'timestamp': int(time.time() * 1000)
-        # })
         send_success('OBD Success', 'Connessione obd riuscita!')
     else:
         print("❌ Errore di connessione all'OBD")
-        # sio.emit('popup_channel', {
-        #     'type': 'error',
-        #     'title': 'OBD Error',
-        #     'message': f"Connessione obd non riuscita, attivo la modalita' di simulazione",
-        #     'timestamp': int(time.time() * 1000)
-        # })
         send_error('OBD Error', 'Connessione obd non riuscita, attivo la modalita\' di simulazione')
 
     eventlet_data = eventlet.spawn(send_data)

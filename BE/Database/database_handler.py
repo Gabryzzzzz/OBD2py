@@ -8,6 +8,7 @@ class DatabaseHandler:
         self.conn = None
         self.connect()
         self.create_tables()
+        self.delete_simulated_data()
 
     def connect(self):
         """Establishes a connection to the SQLite database."""
@@ -93,7 +94,8 @@ class DatabaseHandler:
         if category_id:
             try:
                 cursor = self.conn.cursor()
-                cursor.execute("INSERT INTO OBDData (CategoryID, Value) VALUES (?, ?)", (category_id, str(value)))
+                # Use datetime('now', '+1 hour') to adjust for the user's timezone (e.g., UTC+1)
+                cursor.execute("INSERT INTO OBDData (CategoryID, Value, Timestamp) VALUES (?, ?, datetime('now', '+1 hour'))", (category_id, str(value)))
                 self.conn.commit()
             except sqlite3.Error as e:
                 print(f"❌ Errore durante l'inserimento dei dati: {e}")
@@ -103,11 +105,31 @@ class DatabaseHandler:
         if not self.conn: return
         try:
             cursor = self.conn.cursor()
-            cursor.execute("INSERT INTO dtc_codes (Code, Description, Status) VALUES (?, ?, ?)", (code, description, status))
+            # Use datetime('now', '+1 hour') to adjust for the user's timezone
+            cursor.execute("INSERT INTO dtc_codes (Code, Description, Status, Timestamp) VALUES (?, ?, ?, datetime('now', '+1 hour'))", (code, description, status))
             self.conn.commit()
             print(f"✅ DTC Inserito: {code}")
         except sqlite3.Error as e:
             print(f"❌ Errore durante l'inserimento del DTC: {e}")
+
+    def delete_simulated_data(self):
+        """Deletes all records from OBDData that were marked as simulated."""
+        if not self.conn:
+            print("⚠️ Impossibile eliminare dati simulati: nessuna connessione al database.")
+            return
+
+        try:
+            cursor = self.conn.cursor()
+            # The LIKE operator is used for broad compatibility, as it doesn't depend on the SQLite JSON1 extension.
+            # It finds any entry where the 'Value' text contains the substring '"simulated": true'.
+            cursor.execute("""
+                DELETE FROM OBDData 
+                WHERE Value LIKE '%"simulated": true%'
+            """)
+            self.conn.commit()
+            print(f"🧹 Dati simulati precedenti eliminati ({cursor.rowcount} record).")
+        except sqlite3.Error as e:
+            print(f"❌ Errore durante l'eliminazione dei dati simulati: {e}")
 
 # Example usage:
 if __name__ == '__main__':
