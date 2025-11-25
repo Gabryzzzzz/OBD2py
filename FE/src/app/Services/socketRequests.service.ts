@@ -35,4 +35,26 @@ export class SocketRequestsService {
     return this.socket.fromEvent<any, any>('local_ip');
   }
 
+  /**
+   * Requests historical data for a specific category within a date range.
+   * @param category The name of the data category (e.g., 'motore_prestazioni').
+   * @param startDate The start of the date range in 'YYYY-MM-DD HH:MM:SS' format.
+   * @param endDate The end of the date range in 'YYYY-MM-DD HH:MM:SS' format.
+   */
+  requestDataByRange(category: string, startDate: string, endDate: string) {
+    const payload = {
+      category,
+      startDate,
+      endDate
+    };
+    this.socket.emit('get_data_by_range', payload);
+  }
+
+  /**
+   * Listens for the result of a data range request.
+   * @returns An observable that emits the data array.
+   */
+  getDataRangeResult() {
+    return this.socket.fromEvent<any[], any>('data_range_result');
+  }
 }

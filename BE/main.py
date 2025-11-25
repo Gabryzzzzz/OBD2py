@@ -5,9 +5,9 @@ import socketio
 import socket
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
+from Database.database_handler import DatabaseHandler
 from gyroscope import gyroscope
 from led import led
-from inputs import get_gamepad
 import os
 import threading
 import subprocess
@@ -16,12 +16,6 @@ import unicodedata
 
 CONTROLLER_LOG_PATH = "ps3_controller/controller_log.txt"
 
-# TMs = []
-# def aggiungi_display(clk, dio):
-#     TMs.append(tm1637.TM1637(clk=clk, dio=dio))
-
-# aggiungi_display(25, 8)
-# aggiungi_display(7, 1)
 # Abilita WebSocket asincroni
 eventlet.monkey_patch()
 
@@ -37,8 +31,10 @@ eventlet_data = None
 
 informazioni_richieste = {
     "motore": True,
-    "altri_dati": False
+    "altri_dati": True
 }
+
+db_handler = DatabaseHandler()
 
 def send_gyroscope_data():
     while True:
@@ -49,14 +45,18 @@ def send_gyroscope_data():
 
 # Funzione per inviare dati periodicamente
 def send_data():
-    eventlet.spawn(send_gyroscope_data)
+    if cfg.IS_RASPBERRY_PI:
+        eventlet.spawn(send_gyroscope_data)
     while True:
         if informazioni_richieste['motore']:
-            motore_prestazioni.leggi_dati(connection, sio, cfg, led)
+            if cfg.IS_RASPBERRY_PI:
+                motore_prestazioni.leggi_dati(connection, sio, cfg, led, db_handler)
+            else:
+                motore_prestazioni.leggi_dati(connection, sio, cfg, None, db_handler)
             # acc, gyr, temp = gyroscope.get_info()
             # sio.emit('posizione', [ acc, gyr, temp ])
         if informazioni_richieste['altri_dati']:
-            altri_dati.leggi_dati(connection, sio)
+            altri_dati.leggi_dati(connection, sio, db_handler)
         # temperatura_sensori.leggi_dati(connection, sio)
         # diagnostica.leggi_dati(connection, sio)
         # emissioni.leggi_dati(connection, sio)
@@ -70,20 +70,22 @@ def configure_obd():
 
     # Determine possible ports based on the operating system
     possible_ports = []
+    connection = None
     if os.name == 'posix': # For Linux, macOS, etc.
         print("🐧 Rilevato sistema operativo POSIX (Linux/macOS). Scansione porte /dev/tty...")
         possible_ports.extend([f"/dev/ttyUSB{i}" for i in range(4)])
         possible_ports.extend([f"/dev/ttyACM{i}" for i in range(4)])
     elif os.name == 'nt': # For Windows
-        print("💻 Rilevato sistema operativo Windows. Scansione porte COM...")
-        possible_ports.extend([f"COM{i}" for i in range(1, 9)])
-
-    connection = None
+        eventlet_data = eventlet.spawn(send_data)
+        eventlet_obd = None # Clear the spawner task as it has completed
+        return
 
     for port in possible_ports:
         print(f"🔄 Tentativo di connessione sulla porta: {port}")
         try:
-            connection = obd.OBD(port, fast=False, timeout=30)
+            connection = obd.OBD(port, fast=True, timeout=10)
+            if connection.is_connected():
+                break
         except Exception as e:
             print(f"⚠️  Errore durante l'inizializzazione di python-obd su {port}: {e}")
             continue # Try the next port
@@ -98,21 +100,9 @@ def configure_obd():
 
     if connection: # Check if the connection object exists, not if it's connected (it will be if it exists)
         print("✅ Connessione OBD riuscita!")
-        # sio.emit('popup_channel', {
-        #     'type': 'success',
-        #     'title': 'OBD Success',
-        #     'message': f"Connessione obd riuscita!",
-        #     'timestamp': int(time.time() * 1000)
-        # })
         send_success('OBD Success', 'Connessione obd riuscita!')
     else:
         print("❌ Errore di connessione all'OBD")
-        # sio.emit('popup_channel', {
-        #     'type': 'error',
-        #     'title': 'OBD Error',
-        #     'message': f"Connessione obd non riuscita, attivo la modalita' di simulazione",
-        #     'timestamp': int(time.time() * 1000)
-        # })
         send_error('OBD Error', 'Connessione obd non riuscita, attivo la modalita\' di simulazione')
 
     eventlet_data = eventlet.spawn(send_data)
@@ -195,6 +185,7 @@ def update_config_file(config_data):
 data_requested_led = "acc"
 setup_executed = False
 def setup_display():
+    print("🚀 Avvio setup LED Display...")
     if not setup_executed:
         # time.sleep(1)
         led.setup_led_display()
@@ -222,11 +213,6 @@ def setup_display():
                 # eventlet.spawn(led.TMs[1].temperature, int(temp))
                 pass
             time.sleep(0.1)
-
-
-
-
-
 
 def dividi_numero(valore_float):
     # 1. Converti il float in una stringa
@@ -351,6 +337,30 @@ def stop_obd(sid):
 
     send_success('OBD Stop', 'OBD fermato con successo!')
 
+@sio.on('get_data_by_range')
+def get_data_by_range(sid, data):
+    """
+    Handles a request from the client to get historical data for a category within a date range.
+    Expected data format: {'category': 'motore_prestazioni', 'startDate': 'YYYY-MM-DD HH:MM:SS', 'endDate': 'YYYY-MM-DD HH:MM:SS'}
+    """
+    # print(f"📊 Richiesta dati storici ricevuta: {data}")
+    try:
+        category = data['category']
+        start_date = data['startDate']
+        end_date = data['endDate']
+
+        results = db_handler.get_data_by_category_and_range(category, start_date, end_date)
+
+        # The 'Value' column is a JSON string, so we parse it before sending it back.
+        for row in results:
+            row['Value'] = json.loads(row['Value'])
+
+        print(f"📤 Invio di {len(results)} record per la categoria '{category}'.")
+        sio.emit('data_range_result', results, to=sid)
+    except (KeyError, TypeError) as e:
+        print(f"❌ Errore nella richiesta dati storici: formato dati non valido. {e}")
+        sio.emit('popup_channel', {'type': 'error', 'title': 'Errore Richiesta', 'message': 'Formato dati non valido.'}, to=sid)
+
 def monitor_controller_log():
     """
     Monitors the controller log file for new commands, sends them via WebSocket,
@@ -424,15 +434,7 @@ def monitor_controller_log():
             pass # File might not exist yet, just wait
         eventlet.sleep(0.1) # Check the file every 100ms
 
-# Avvia il server
-if __name__ == '__main__':
-    # global eventlet_obd # This is not needed here as it's already global
-    data_requested_led = cfg.LED_CONFIG
-    
-    eventlet.spawn(gyroscope.start_gyro)
-    time.sleep(2)
-    eventlet.spawn(setup_display)
-
+def setup_controller():
     #--- Start sixad driver for PS3 controller if not running ---
     print("🎮 Checking for sixad driver...")
     check_sixad = subprocess.run(["pgrep", "sixad"], capture_output=True, text=True)
@@ -468,14 +470,24 @@ if __name__ == '__main__':
     # Start the background task to monitor the controller's log file
     eventlet.spawn(monitor_controller_log)
 
+
+# Avvia il server
+if __name__ == '__main__':
+    # global eventlet_obd # This is not needed here as it's already global
+    data_requested_led = cfg.LED_CONFIG
+
+    if cfg.IS_RASPBERRY_PI:
+        eventlet.spawn(setup_controller)
+        eventlet.spawn(gyroscope.start_gyro)
+        time.sleep(2)
+        eventlet.spawn(setup_display)
+
     print("🚀 Server WebSocket in esecuzione su porta 5000...")
     print("🚀 Server WebSocket in esecuzione")
     print("Inizio configurazione OBD...")
     # eventlet.spawn(configure_obd) must add a way to identify and kill it
     eventlet_obd = eventlet.spawn(configure_obd)
 
-
-    # eventlet.spawn(setup_display) 
     #get the locale ip with get_ip() and save it to a file into ../FE/src/assets/ip.txt
     ip = get_ip()
     print("📤 IP locale:", ip)
@@ -486,4 +498,7 @@ if __name__ == '__main__':
     with open('../FE/src/assets/ip.ts', 'w') as f:
         f.write(template)
 
-    eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
+    try:
+        eventlet.wsgi.server(eventlet.listen(('0.0.0.0', 5000)), app)
+    finally:
+        db_handler.close()

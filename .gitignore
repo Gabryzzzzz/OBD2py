@@ -44,3 +44,8 @@
 #Python
 /BE/__pycache__
 BE/OBD_Handler/__pycache__/*.pyc
+BE/gyroscope/__pycache__/gyroscope.cpython-39.pyc
+BE/obd2py.db
+BE/OBD_Handler/__pycache__/motore_prestazioni.cpython-39.pyc
+BE/config.json
+config.json

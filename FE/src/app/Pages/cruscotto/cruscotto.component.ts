@@ -1,5 +1,6 @@
-import { Component, inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, ViewChild } from '@angular/core';
 import { AltriDatiService } from 'src/app/Services/OBD_Handler/altri_dati.service';
+import { ApexOptions } from 'ng-apexcharts';
 import {
   motore_prestazioni,
   MotorePrestazioniService,
@@ -7,6 +8,19 @@ import {
 import { RichiesteCanaliService } from 'src/app/Services/OBD_Handler/richieste_canali.service';
 import { SocketRequestsService } from 'src/app/Services/socketRequests.service';
 import { UtilsService } from 'src/app/Services/utils.service';
+
+import {ApexAxisChartSeries, ApexChart, ApexXAxis, ApexDataLabels, ApexStroke, ApexGrid, ApexFill, ApexLegend} from "ng-apexcharts";
+
+export type ChartOptions = {
+  series: ApexAxisChartSeries;
+  chart: ApexChart;
+  xaxis: ApexXAxis;
+  stroke: ApexStroke;
+  fill: ApexFill;
+  legend: ApexLegend;
+  // Add other types for better intellisense
+  [key: string]: any;
+};
 
 export interface cruscotto_configuration {
   throttle_data: {
@@ -23,6 +37,12 @@ export interface cruscotto_configuration {
   standalone: false,
 })
 export class CruscottoComponent implements OnInit, OnDestroy {
+
+  public speedThrottleChartOptions: ChartOptions;
+  public rpmChartOptions: ChartOptions;
+  private chartUpdateInterval: any;
+  title: any;
+
   maxRpm: number = 7200; // RPM massimo
   rpmPercentage: number = 0; // Altezza della barra
   rpmColor: string = 'green'; // Colore iniziale
@@ -64,12 +84,50 @@ export class CruscottoComponent implements OnInit, OnDestroy {
     private abilita_canali_service: RichiesteCanaliService,
     private utils_service: UtilsService
   ) {
+     this.speedThrottleChartOptions = {
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9, stops: [0, 90, 100] } },
+      series: [
+        { name: "Velocità (km/h)", data: [] },
+        { name: "Acceleratore (%)", data: [] }
+      ],
+      chart: {
+        type: "line",
+        height: 180,
+        animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 0 } },
+        toolbar: { show: false } // Hide the options menu
+      },
+      xaxis: { type: "datetime" },
+      dataLabels: { enabled: false },
+      stroke: { curve: "smooth", width: 2 },
+      grid: {
+        borderColor: '#e7e7e7'
+      },
+      legend: { show: false } // Hide the legend
+    };
+    this.rpmChartOptions = {
+      series: [ { name: "RPM", data: [] } ],
+      chart: {
+        type: "area",
+        height: 180,
+        animations: { enabled: true, easing: 'linear', dynamicAnimation: { speed: 0 } },
+        toolbar: { show: false } // Hide the options menu
+      },
+      xaxis: { type: "datetime" },
+      dataLabels: { enabled: false },
+      stroke: { curve: "smooth", width: 2 },
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9, stops: [0, 90, 100] } },
+      legend: { show: false } // Hide the legend
+    };
     this.setup_configuration();
   }
 
   ngOnDestroy(): void {
     this.abilita_canali_service.abilita_canale("motore", false)
     this.abilita_canali_service.abilita_canale("altri_dati", false)
+    // Clear the interval when the component is destroyed to prevent memory leaks
+    if (this.chartUpdateInterval) {
+      clearInterval(this.chartUpdateInterval);
+    }
   }
 
   test_led(data: string){
@@ -245,6 +303,11 @@ export class CruscottoComponent implements OnInit, OnDestroy {
 
 
   ngOnInit(): void {
+    // Start fetching chart data periodically
+    this.chartUpdateInterval = setInterval(() => {
+      this.fetchChartData();
+    },  this.DELAY_CHART); // Run every 5 seconds
+
     this.abilita_canali_service.abilita_canale('motore', true)
     this.abilita_canali_service.abilita_canale('altri_dati', true)
     this.socket_requests.get_local_ip_receiver().subscribe((data) => {
@@ -254,6 +317,11 @@ export class CruscottoComponent implements OnInit, OnDestroy {
     this.altri_dati_service.getMessage().subscribe((res) => {
       this.km_A = res.km_percorsi;
     })
+
+    this.socket_requests.getDataRangeResult().subscribe(data => {
+      this.updateChart(data);
+    });
+
     this.motore.getMessage().subscribe((data) => {
       if (!this.test_mode) {
         // console.log(data);
@@ -281,5 +349,67 @@ export class CruscottoComponent implements OnInit, OnDestroy {
       this.handle_speed_animation();
       this.handle_throttle();
     }
+  }
+
+  /**
+   * Fetches the last 5 seconds of engine data from the backend.
+   */
+
+  DELAY_CHART = 1000
+
+  private fetchChartData() {
+    const now = new Date();
+    const fiveSecondsAgo = new Date(now.getTime() - this.DELAY_CHART);
+
+    const endDate = this.formatDateForBackend(now);
+    const startDate = this.formatDateForBackend(fiveSecondsAgo);
+
+    this.socket_requests.requestDataByRange('motore_prestazioni', startDate, endDate);
+  }
+
+  /**
+   * Updates the chart with new data received from the backend.
+   * @param data The array of data points.
+   */
+  private updateChart(data: any[]) {
+    const MAX_DATA_POINTS = 60;
+    // Get references to the current series data arrays for both charts
+    const speedData = this.speedThrottleChartOptions.series[0].data as [number, number][];
+    const throttleData = this.speedThrottleChartOptions.series[1].data as [number, number][];
+    const rpmData = this.rpmChartOptions.series[0].data as [number, number][];
+
+    data.forEach(item => {
+      const timestamp = new Date(item.Timestamp).getTime();
+      // Push the new data points into the existing arrays
+      speedData.push([timestamp, item.Value.velocita]);
+      throttleData.push([timestamp, item.Value.acceleratore]);
+      rpmData.push([timestamp, item.Value.rpm]);
+    });
+
+    // If the number of data points exceeds the limit, remove the oldest ones.
+    if (rpmData.length > MAX_DATA_POINTS) {
+      const toRemove = rpmData.length - MAX_DATA_POINTS;
+      // The splice() method changes the contents of an array by removing or replacing existing elements.
+      speedData.splice(0, toRemove);
+      throttleData.splice(0, toRemove);
+      rpmData.splice(0, toRemove);
+    }
+
+    // To trigger a chart update, we create a new array with the updated data series.
+    this.speedThrottleChartOptions.series = [
+      { name: "Velocità (km/h)", data: [...speedData] },
+      { name: "Acceleratore (%)", data: [...throttleData] }
+    ];
+    this.rpmChartOptions.series = [
+      { name: "RPM", data: [...rpmData] }
+    ];
+  }
+
+  /**
+   * Formats a Date object into the 'YYYY-MM-DD HH:MM:SS' string format required by the backend.
+   */
+  private formatDateForBackend(date: Date): string {
+    const pad = (num: number) => num.toString().padStart(2, '0');
+    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
   }
 }

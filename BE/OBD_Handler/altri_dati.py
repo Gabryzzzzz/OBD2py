@@ -1,11 +1,16 @@
 import obd
 import random
 from config import config as cfg
+import json
 
 import time
 
+# --- Global variables for tracking state ---
 km_percorsi = 0
 last_time = time.time()
+last_db_log_time = 0
+
+DB_LOG_INTERVAL = 10 # Log to database every 10 seconds
 
 def aggiorna_distanza(connection):
     global km_percorsi, last_time
@@ -37,13 +42,28 @@ def aggiorna_distanza(connection):
 
     return km_percorsi
 
-def leggi_dati(connection, sio):
-    #se non è connesso simulare i dati
+def leggi_dati(connection, sio, db_handler):
+    global last_db_log_time
+
+    # Update distance traveled based on current speed
     aggiorna_distanza(connection)
+
+    # Emit data to frontend on every call
     dati = {
         "km_percorsi": km_percorsi
     }
     sio.emit('altri_dati', dati)
     
+    # --- Timed Database Logging ---
+    current_time = time.time()
+    if current_time - last_db_log_time > DB_LOG_INTERVAL:
+        is_simulated = not connection or not connection.is_connected()
+        db_data = {
+            "km_percorsi": round(km_percorsi, 4),
+            "simulated": is_simulated
+        }
+        db_handler.insert_data('altri_dati', json.dumps(db_data))
+        last_db_log_time = current_time # Reset the timer
+
     if cfg.SHOW_PRINTS:
         print(f"📤 Consumi: {dati}")
