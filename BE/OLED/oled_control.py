@@ -11,7 +11,7 @@ WIDTH = 128
 HEIGHT = 32
 
 # Inizializza l'interfaccia I2C (usando i pin predefiniti del Raspberry Pi: SDA=GPIO2, SCL=GPIO3)
-i2c = busio.I2C(21, 20)
+i2c = busio.I2C(board.SCL, board.SDA)
 
 # Crea l'oggetto display SSD1306
 # Il tuo display 0.91" (Ver 1.6) usa l'indirizzo I2C 0x3C di default
