@@ -102,7 +102,9 @@ export class CruscottoComponent implements OnInit, OnDestroy {
       grid: {
         borderColor: '#e7e7e7'
       },
-      legend: { show: false } // Hide the legend
+      legend: { show: false }, // Hide the legend
+      tooltip: { enabled: true},
+      colors: ["#f44336", "#ff9800", "#4caf50"] //Add this line
     };
     this.rpmChartOptions = {
       series: [ { name: "RPM", data: [] } ],
@@ -116,7 +118,9 @@ export class CruscottoComponent implements OnInit, OnDestroy {
       dataLabels: { enabled: false },
       stroke: { curve: "smooth", width: 2 },
       fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.9, stops: [0, 90, 100] } },
-      legend: { show: false } // Hide the legend
+      legend: { show: false }, // Hide the legend
+      tooltip: { enabled: true},
+      colors: ["#f44336", "#ff9800", "#4caf50"] //Add this line
     };
     this.setup_configuration();
   }
@@ -258,27 +262,7 @@ export class CruscottoComponent implements OnInit, OnDestroy {
 
   handle_throttle() {
     if (this.obd_data != undefined) {
-      // Calcola l'altezza in percentuale
-      // this.throttlePercentage =
-      //   (this.obd_data!.acceleratore / this.maxThrottle) * 100;
 
-      // if (this.throttlePercentage > 100) {
-      //   this.throttlePercentage = 100;
-      // }
-
-      // // Cambia colore da verde a rosso
-      // const red = Math.min(
-      //   255,
-      //   Math.floor((this.obd_data!.acceleratore / this.maxThrottle) * 255)
-      // );
-      // const green = Math.max(0, 255 - red);
-      // this.throttleColor = `rgb(${red}, ${green}, 0)`;
-      // this.handle_throttle_animation();
-      // console.log(this.throttleColor)
-      // console.log(this.obd_data!.acceleratore);
-      // console.log(this.throttlePercentage);
-
-      //rebuild using min and max throttle
       this.throttlePercentage =
         ((this.obd_data!.acceleratore - this.configuration.throttle_data.min) /
           (this.configuration.throttle_data.max - this.configuration.throttle_data.min)) *
@@ -381,9 +365,9 @@ export class CruscottoComponent implements OnInit, OnDestroy {
     data.forEach(item => {
       const timestamp = new Date(item.Timestamp).getTime();
       // Push the new data points into the existing arrays
-      speedData.push([timestamp, item.Value.velocita]);
-      throttleData.push([timestamp, item.Value.acceleratore]);
-      rpmData.push([timestamp, item.Value.rpm]);
+      speedData.push([timestamp, item.velocita]);
+      throttleData.push([timestamp, item.acceleratore]);
+      rpmData.push([timestamp, item.rpm]);
     });
 
     // If the number of data points exceeds the limit, remove the oldest ones.

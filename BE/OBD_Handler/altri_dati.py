@@ -1,7 +1,6 @@
 import obd
 import random
 from config import config as cfg
-import json
 
 import time
 
@@ -62,7 +61,7 @@ def leggi_dati(connection, sio, db_handler):
             "km_percorsi": round(km_percorsi, 4),
             "simulated": is_simulated
         }
-        db_handler.insert_data('altri_dati', json.dumps(db_data))
+        db_handler.insert_altri_dati_data(db_data)
         last_db_log_time = current_time # Reset the timer
 
     if cfg.SHOW_PRINTS:

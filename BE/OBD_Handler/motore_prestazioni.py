@@ -1,7 +1,6 @@
 import obd
 import random
 from config import config as cfg
-import json
 
 def leggi_dati(connection, sio, cfg, led, db_handler):
     comandi = {
@@ -31,7 +30,7 @@ def leggi_dati(connection, sio, cfg, led, db_handler):
         
         dati['simulated'] = False
         sio.emit('motore', dati)
-        db_handler.insert_data('motore_prestazioni', json.dumps(dati))
+        db_handler.insert_motore_prestazioni_data(dati)
 
         if cfg.SHOW_PRINTS:
             print(f"📤 Motore: {dati}")
@@ -55,7 +54,7 @@ def simula_dati(sio, cfg, led, db_handler):
         led.TMs[2].number(int(dati["rpm"]))
 
     sio.emit('motore', dati)
-    db_handler.insert_data('motore_prestazioni', json.dumps(dati))
+    db_handler.insert_motore_prestazioni_data(dati)
 
     if cfg.SHOW_PRINTS:
         print(f"📤 Motore: {dati}")

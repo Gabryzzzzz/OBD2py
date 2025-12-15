@@ -65,6 +65,30 @@ class DatabaseHandler:
                 )
             """)
 
+            # Table for storing performance engine data
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS MotorePrestazioniData (
+                    DataID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    rpm INTEGER,
+                    velocita INTEGER,
+                    acceleratore INTEGER,
+                    pressione_map INTEGER,
+                    flusso_maf INTEGER,
+                    simulated BOOLEAN NOT NULL
+                )
+            """)
+
+            # Table for storing other data like km traveled
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS AltriDatiData (
+                    DataID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Timestamp DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    km_percorsi REAL,
+                    simulated BOOLEAN NOT NULL
+                )
+            """)
+
             self.conn.commit()
             print("✅ Tabelle del database verificate/create con successo.")
         except sqlite3.Error as e:
@@ -100,6 +124,49 @@ class DatabaseHandler:
             except sqlite3.Error as e:
                 print(f"❌ Errore durante l'inserimento dei dati: {e}")
 
+    def insert_motore_prestazioni_data(self, data):
+        """Inserts a performance engine data point into the specific table."""
+        if not self.conn: return
+        try:
+            cursor = self.conn.cursor()
+            query = """
+                INSERT INTO MotorePrestazioniData 
+                (rpm, velocita, acceleratore, pressione_map, flusso_maf, simulated, Timestamp)
+                VALUES (:rpm, :velocita, :acceleratore, :pressione_map, :flusso_maf, :simulated, datetime('now', '+1 hour'))
+            """
+            # Ensure all keys are present, providing a default if not
+            data_to_insert = {
+                'rpm': data.get('rpm'),
+                'velocita': data.get('velocita'),
+                'acceleratore': data.get('acceleratore'),
+                'pressione_map': data.get('pressione_map'),
+                'flusso_maf': data.get('flusso_maf'),
+                'simulated': data.get('simulated', False)
+            }
+            cursor.execute(query, data_to_insert)
+            self.conn.commit()
+        except sqlite3.Error as e:
+            print(f"❌ Errore durante l'inserimento dei dati motore: {e}")
+
+    def insert_altri_dati_data(self, data):
+        """Inserts other data (like km_percorsi) into the specific table."""
+        if not self.conn: return
+        try:
+            cursor = self.conn.cursor()
+            query = """
+                INSERT INTO AltriDatiData 
+                (km_percorsi, simulated, Timestamp)
+                VALUES (:km_percorsi, :simulated, datetime('now', '+1 hour'))
+            """
+            data_to_insert = {
+                'km_percorsi': data.get('km_percorsi'),
+                'simulated': data.get('simulated', False)
+            }
+            cursor.execute(query, data_to_insert)
+            self.conn.commit()
+        except sqlite3.Error as e:
+            print(f"❌ Errore durante l'inserimento degli 'altri dati': {e}")
+
     def insert_dtc(self, code, description, status):
         """Inserts a Diagnostic Trouble Code (DTC) into the database."""
         if not self.conn: return
@@ -126,6 +193,17 @@ class DatabaseHandler:
                 DELETE FROM OBDData 
                 WHERE Value LIKE '%"simulated": true%'
             """)
+            # Also delete from the new specific table
+            cursor.execute("""
+                DELETE FROM MotorePrestazioniData
+                WHERE simulated = 1
+            """)
+
+            # Also delete from the 'altri dati' table
+            cursor.execute("""
+                DELETE FROM AltriDatiData
+                WHERE simulated = 1
+            """)
             self.conn.commit()
             print(f"🧹 Dati simulati precedenti eliminati ({cursor.rowcount} record).")
         except sqlite3.Error as e:
@@ -139,28 +217,42 @@ class DatabaseHandler:
         if not self.conn:
             print("⚠️ Impossibile recuperare dati: nessuna connessione al database.")
             return []
-
+        
         try:
             cursor = self.conn.cursor()
-            # The query joins OBDData with Categories to filter by name,
-            # and filters the timestamp between the start and end dates.
-            query = """
-                SELECT
-                    d.Timestamp,
-                    d.Value
-                FROM
-                    OBDData d
-                JOIN
-                    Categories c ON d.CategoryID = c.CategoryID
-                WHERE
-                    c.Name = ? AND
-                    d.Timestamp BETWEEN ? AND ?
-                ORDER BY
-                    d.Timestamp ASC
-            """
-            cursor.execute(query, (category_name, start_date, end_date))
-            # Convert rows to a list of dictionaries for easier handling
+            query = ""
+
+            if category_name == 'motore_prestazioni':
+                query = """
+                    SELECT Timestamp, rpm, velocita, acceleratore, pressione_map, flusso_maf, simulated
+                    FROM MotorePrestazioniData
+                    WHERE Timestamp BETWEEN ? AND ?
+                    ORDER BY Timestamp ASC
+                """
+            elif category_name == 'altri_dati':
+                query = """
+                    SELECT Timestamp, km_percorsi, simulated
+                    FROM AltriDatiData
+                    WHERE Timestamp BETWEEN ? AND ?
+                    ORDER BY Timestamp ASC
+                """
+            else:
+                # Fallback to the generic OBDData table for other categories
+                query = """
+                    SELECT d.Timestamp, d.Value
+                    FROM OBDData d
+                    JOIN Categories c ON d.CategoryID = c.CategoryID
+                    WHERE c.Name = ? AND d.Timestamp BETWEEN ? AND ?
+                    ORDER BY d.Timestamp ASC
+                """
+
+            if category_name in ['motore_prestazioni', 'altri_dati']:
+                cursor.execute(query, (start_date, end_date))
+            else:
+                cursor.execute(query, (category_name, start_date, end_date))
+
             return [dict(row) for row in cursor.fetchall()]
+
         except sqlite3.Error as e:
             print(f"❌ Errore durante il recupero dei dati per intervallo: {e}")
             return []

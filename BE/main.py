@@ -6,10 +6,16 @@ import socket
 from config import config as cfg
 from OBD_Handler import motore_prestazioni, altri_dati, consumi_carburante, temperatura_sensori, diagnostica, emissioni
 from Database.database_handler import DatabaseHandler
-from gyroscope import gyroscope
-from led import led
 import os
 import threading
+
+# Conditional imports for Raspberry Pi specific modules
+led = None
+gyroscope = None
+if cfg.IS_RASPBERRY_PI:
+    from gyroscope import gyroscope
+    from led import led
+
 import subprocess
 import json
 import unicodedata
@@ -139,9 +145,10 @@ def send_error(title, message):
     # This assumes the scroll() method accepts a 'delay' keyword argument in milliseconds.
     delay = max(100, 250 - len(sanitized_message) * 5) # Ensure delay is at least 100ms
 
-    led.TMs[1].write([0, 0, 0, 0])
-    led.TMs[2].write([0, 0, 0, 0])
-    led.TMs[0].scroll(sanitized_message, delay=delay)
+    if led:
+        led.TMs[1].write([0, 0, 0, 0])
+        led.TMs[2].write([0, 0, 0, 0])
+        led.TMs[0].scroll(sanitized_message, delay=delay)
 
     sio.emit('popup_channel', {
         'type': 'error',
@@ -188,7 +195,7 @@ def setup_display():
     print("🚀 Avvio setup LED Display...")
     if not setup_executed:
         # time.sleep(1)
-        led.setup_led_display()
+        if led: led.setup_led_display()
         # eventlet.spawn(gyroscope.start_gyro)
         # eventlet.spawn(send_pos_info)
         while True:
@@ -199,16 +206,18 @@ def setup_display():
                 x1, x2 = dividi_numero(acc[0])
                 y1, y2 = dividi_numero(acc[1])
                 z1, z2 = dividi_numero(acc[2])
-                eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
-                eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
-                eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
+                if led:
+                    eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
+                    eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
+                    eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
             if data_requested_led == "gyr":
                 x1, x2 = dividi_numero(gyr[0])
                 y1, y2 = dividi_numero(gyr[1])
                 z1, z2 = dividi_numero(gyr[2])
-                eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
-                eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
-                eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
+                if led:
+                    eventlet.spawn(led.TMs[0].numbers, int(x1), int(x2))
+                    eventlet.spawn(led.TMs[1].numbers, int(y1), int(y2))
+                    eventlet.spawn(led.TMs[2].numbers, int(z1), int(z2))
             if data_requested_led == "temp":
                 # eventlet.spawn(led.TMs[1].temperature, int(temp))
                 pass
@@ -258,8 +267,9 @@ def test_led(sid, data):
     # os.system("python /home/gabryzzzzz/Documents/led.py")
     # eventlet.spawn(setup_hardware)
     global data_requested_led
-    data_requested_led = data
-    eventlet.spawn(setup_display)
+    if cfg.IS_RASPBERRY_PI:
+        data_requested_led = data
+        eventlet.spawn(setup_display)
     time.sleep(2)
     send_success('TEST LED', 'Fine test')
 
@@ -351,11 +361,14 @@ def get_data_by_range(sid, data):
 
         results = db_handler.get_data_by_category_and_range(category, start_date, end_date)
 
-        # The 'Value' column is a JSON string, so we parse it before sending it back.
-        for row in results:
-            row['Value'] = json.loads(row['Value'])
+        # For old categories, the 'Value' is a JSON string that needs parsing.
+        # For new tables, the data is already structured.
+        if category not in ['motore_prestazioni', 'altri_dati']:
+            for row in results:
+                if 'Value' in row and isinstance(row['Value'], str):
+                    row['Value'] = json.loads(row['Value'])
 
-        print(f"📤 Invio di {len(results)} record per la categoria '{category}'.")
+        print(f"📤 Invio di {len(results)} record per la categoria '{category}' al client {sid}.")
         sio.emit('data_range_result', results, to=sid)
     except (KeyError, TypeError) as e:
         print(f"❌ Errore nella richiesta dati storici: formato dati non valido. {e}")
@@ -399,7 +412,8 @@ def monitor_controller_log():
                         elif command == 'RETRY_OBD_CONNECTION':
                             print("🎮 Comando ricevuto: Riprova connessione OBD.")
                             send_info("Controller", "Riprova connessione OBD...")
-                            led.TMs[0].scroll("OBD-RETRY") # Display message on LEDs
+                            if led:
+                                led.TMs[0].scroll("OBD-RETRY") # Display message on LEDs
                             restart_obd(None) # Call the existing restart function
                         elif command in ('INTERVAL_UP', 'INTERVAL_DOWN'):
                             with open('config.json', 'r') as f_config:

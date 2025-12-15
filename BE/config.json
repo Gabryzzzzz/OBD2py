@@ -1,6 +1,6 @@
 {
     "OBD_PORT": "/dev/ttyUSB0",
-    "UPDATE_INTERVAL": 0.2,
+    "UPDATE_INTERVAL": 0.5,
     "SHOW_PRINTS": false,
     "TRY_TIMES": 4,
     "TRY_SLEEP": 4,
